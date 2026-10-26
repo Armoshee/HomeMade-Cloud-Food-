@@ -120,43 +120,31 @@
         render();
     });
 
-    form.addEventListener("submit", async (event) => {
+    form.addEventListener("submit", (event) => {
         event.preventDefault();
-        if (!entries().length) return;
-        const submit = form.querySelector(".place-order-button");
-        const original = submit.textContent;
-        submit.disabled = true;
-        submit.textContent = "Sending order...";
+        const items = entries();
+        if (!items.length) return;
         status.textContent = "";
         const data = new FormData(form);
-        const order = {
-            customerName: data.get("customerName"),
-            customerPhone: data.get("customerPhone"),
-            pincode: data.get("pincode"),
-            address: data.get("address"),
-            city: data.get("city"),
-            notes: data.get("notes") || "",
-            items: entries().map(([id, item]) => ({ id, qty: item.qty }))
-        };
-        try {
-            const response = await fetch("/api/orders", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(order)
-            });
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(result.error || "Could not place the order. Please try again.");
-            cart = {};
-            save();
-            form.reset();
-            render();
-            status.textContent = "Order received! Order number: " + result.orderId + ". We will contact you soon.";
-        } catch (error) {
-            status.textContent = error.message || "Order could not be sent. Please try again.";
-        } finally {
-            submit.disabled = false;
-            submit.textContent = original;
-        }
+        const total = items.reduce((sum, [, item]) => sum + Number(item.qty) * Number(item.price), 0);
+        const orderLines = items.map(([, item]) =>
+            `• ${item.name} × ${item.qty} — ${money.format(Number(item.price) * Number(item.qty))}`
+        );
+        const message = [
+            "New order — HomeMade Cloud Food",
+            "",
+            ...orderLines,
+            `Total (products only): ${money.format(total)}`,
+            "",
+            `Customer: ${data.get("customerName")}`,
+            `Phone / WhatsApp: ${data.get("customerPhone")}`,
+            `Address: ${data.get("address")}, ${data.get("city")} — PIN ${data.get("pincode")}`,
+            data.get("notes") ? `Notes: ${data.get("notes")}` : ""
+        ].filter(Boolean).join("\n");
+        const whatsappUrl = `https://wa.me/918438606950?text=${encodeURIComponent(message)}`;
+        const whatsappTab = window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+        if (!whatsappTab) window.location.href = whatsappUrl;
+        status.textContent = "WhatsApp opened with your order details. Tap Send in WhatsApp to place the order. The cart stays saved until you return.";
     });
     render();
 })();
