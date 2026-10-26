@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product | HomeMade Cloud Food</title>
-    <link rel="stylesheet" href="css/site.css">
+    <link rel="stylesheet" href="site.css">
 </head>
 <body>
     <nav>
@@ -61,7 +61,7 @@
         : "Keep refrigerated. Avoid storing at room temperature or in direct sunlight. After opening, keep refrigerated and use a clean, dry spoon.";
     document.title = `${product.name} | HomeMade Cloud Food`;
     panel.innerHTML = `
-        <img src="images/${encodeURIComponent(product.image).replaceAll('%2F', '/') }" alt="${product.name}">
+        <img src="${encodeURIComponent(product.image).replaceAll('%2F', '/') }" alt="${product.name}">
         <div class="product-detail-copy">
             <h1>${product.name}</h1>
             <p>${product.description}</p>
