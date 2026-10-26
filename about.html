@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | HomeMade Cloud Food</title>
+    <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">HomeMade Cloud Food</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+        </ul>
+    </nav>
+<section class="about-section" id="about">
+        <h2>About HomeMade Cloud Food</h2>
+                <div class="fssai-badge">FSSAI Registered Food Business</div>
+        <p>HomeMade Cloud Food is an FSSAI-registered food business committed to care, quality, and food safety.</p>
+    </section>
+<!-- Footer -->
+    <footer>
+        <p>© 2026 HomeMade Cloud Food | Homemade With Love ❤️</p>
+    </footer>
+<script>
+(() => {
+    let cart = {};
+    try { cart = JSON.parse(localStorage.getItem("cloudFoodPicklesCart") || "{}") || {}; } catch {}
+    const count = Object.values(cart).reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+    const label = document.getElementById("cart-count");
+    if (label) label.textContent = String(count);
+})();
+</script>
+</body>
+</html>

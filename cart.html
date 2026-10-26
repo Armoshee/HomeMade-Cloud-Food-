@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart | HomeMade Cloud Food</title>
+    <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">HomeMade Cloud Food</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+        </ul>
+    </nav>
+    <main class="cart-page">
+        <h1>Your Cart</h1>
+        <div id="cart-empty">Your cart is empty. Add products from the Products page.</div>
+        <div id="cart-items"></div>
+        <p class="cart-total">Total: <span id="cart-total">₹0</span></p>
+    <form class="checkout-form" id="checkout-form" hidden>
+        <h3>Delivery details</h3>
+        <label>Full name<input name="customerName" autocomplete="name" required maxlength="100"></label>
+        <div class="form-grid">
+            <label>Phone / WhatsApp number<input name="customerPhone" type="tel" autocomplete="tel" required pattern="[0-9+() -]{7,20}" maxlength="20"></label>
+            <label>PIN code<input name="pincode" inputmode="numeric" autocomplete="postal-code" required pattern="[0-9]{5,10}" maxlength="10"></label>
+        </div>
+        <label>Full delivery address<textarea name="address" autocomplete="street-address" required maxlength="400"></textarea></label>
+        <label>Area / City<input name="city" autocomplete="address-level2" required maxlength="100"></label>
+        <label>Order notes (optional)<textarea name="notes" maxlength="300"></textarea></label>
+        <button class="place-order-button" type="submit">Place Order</button>
+        <p class="checkout-note">Delivery charges and payment method will be confirmed on WhatsApp.</p>
+    </form>
+        <p class="checkout-status" id="checkout-status" role="status" aria-live="polite"></p>
+    </main>
+<!-- Footer -->
+    <footer>
+        <p>© 2026 HomeMade Cloud Food | Homemade With Love ❤️</p>
+    </footer>
+<script>
+(() => {
+    const key = "cloudFoodPicklesCart";
+    const list = document.getElementById("cart-items");
+    const empty = document.getElementById("cart-empty");
+    const totalLabel = document.getElementById("cart-total");
+    const countLabel = document.getElementById("cart-count");
+    const form = document.getElementById("checkout-form");
+    const status = document.getElementById("checkout-status");
+    const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+    let cart = {};
+    try { cart = JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch {}
+
+    function entries() {
+        return Object.entries(cart).filter(([, item]) => item && Number(item.qty) > 0);
+    }
+    function save() {
+        try { localStorage.setItem(key, JSON.stringify(cart)); } catch {}
+    }
+    function render() {
+        const items = entries();
+        const count = items.reduce((sum, [, item]) => sum + Number(item.qty), 0);
+        const total = items.reduce((sum, [, item]) => sum + Number(item.qty) * Number(item.price), 0);
+        countLabel.textContent = String(count);
+        totalLabel.textContent = money.format(total);
+        empty.hidden = items.length > 0;
+        form.hidden = items.length === 0;
+        list.replaceChildren();
+
+        items.forEach(([id, item]) => {
+            const row = document.createElement("div");
+            row.className = "cart-row";
+            const info = document.createElement("div");
+            info.className = "cart-row-info";
+            const name = document.createElement("strong");
+            name.textContent = item.name;
+            const subtotal = document.createElement("small");
+            subtotal.textContent = money.format(item.price) + " each · Subtotal " + money.format(item.price * item.qty);
+            info.append(name, subtotal);
+
+            const controls = document.createElement("div");
+            controls.className = "cart-row-controls";
+            const decrease = document.createElement("button");
+            decrease.type = "button";
+            decrease.className = "quantity-button";
+            decrease.textContent = "−";
+            decrease.dataset.cartAction = "decrease";
+            decrease.dataset.productId = id;
+            const quantity = document.createElement("span");
+            quantity.textContent = String(item.qty);
+            const increase = document.createElement("button");
+            increase.type = "button";
+            increase.className = "quantity-button";
+            increase.textContent = "+";
+            increase.dataset.cartAction = "increase";
+            increase.dataset.productId = id;
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "remove-button";
+            remove.textContent = "Remove";
+            remove.dataset.cartAction = "remove";
+            remove.dataset.productId = id;
+            controls.append(decrease, quantity, increase, remove);
+            row.append(info, controls);
+            list.appendChild(row);
+        });
+    }
+
+    list.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-cart-action]");
+        if (!button || !cart[button.dataset.productId]) return;
+        const id = button.dataset.productId;
+        if (button.dataset.cartAction === "increase") cart[id].qty += 1;
+        if (button.dataset.cartAction === "decrease") cart[id].qty -= 1;
+        if (button.dataset.cartAction === "remove" || cart[id].qty <= 0) delete cart[id];
+        save();
+        render();
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!entries().length) return;
+        const submit = form.querySelector(".place-order-button");
+        const original = submit.textContent;
+        submit.disabled = true;
+        submit.textContent = "Sending order...";
+        status.textContent = "";
+        const data = new FormData(form);
+        const order = {
+            customerName: data.get("customerName"),
+            customerPhone: data.get("customerPhone"),
+            pincode: data.get("pincode"),
+            address: data.get("address"),
+            city: data.get("city"),
+            notes: data.get("notes") || "",
+            items: entries().map(([id, item]) => ({ id, qty: item.qty }))
+        };
+        try {
+            const response = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(order)
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || "Could not place the order. Please try again.");
+            cart = {};
+            save();
+            form.reset();
+            render();
+            status.textContent = "Order received! Order number: " + result.orderId + ". We will contact you soon.";
+        } catch (error) {
+            status.textContent = error.message || "Order could not be sent. Please try again.";
+        } finally {
+            submit.disabled = false;
+            submit.textContent = original;
+        }
+    });
+    render();
+})();
+</script>
+</body>
+</html>
