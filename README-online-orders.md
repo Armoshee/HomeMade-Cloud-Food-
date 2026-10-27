@@ -1,13 +1,13 @@
 # HomeMade Cloud Food Online Orders
 
-This folder contains the website and a Node.js server. Customers can add products to a cart, submit their name and delivery address online, and the server sends an order notification to the shop WhatsApp number.
+This folder contains the website and a Node.js server. Customers can add products to a cart and use secure online checkout when a PhonePe PG account is configured. The server validates payment before confirming an order and can notify the shop through WhatsApp when Meta Business API settings are configured.
 
 ## What is ready
 
 - Add to Cart, Buy Now, quantity controls, and order totals.
 - Checkout form for customer name, phone, delivery address, city, PIN code, and notes.
 - Server-side product and price validation.
-- WhatsApp Business Platform template notification to the shop after online checkout.
+- Optional WhatsApp Business Platform template notification to the shop after successful payment.
 
 ## Publish the website online
 
@@ -41,7 +41,7 @@ For local preview, copy .env.example to .env and fill in the same values. The .e
 
 ## Local preview
 
-Install Node.js 24, open a terminal in this folder, run npm start, and open http://localhost:3000. Orders work only after WhatsApp settings and the approved template are configured.
+Install Node.js 24, open a terminal in this folder, run npm start, and open http://localhost:3000. Online checkout works after PhonePe PG keys are configured. Shop WhatsApp notifications additionally require the Meta WhatsApp settings and an approved template. The local `file://` preview cannot process payments; use `http://localhost:3000` or the deployed Render Node Web Service.
 
 ## Product prices
 
@@ -49,3 +49,27 @@ The server keeps a copy of the price list so customers cannot change a price in 
 
 
 
+
+## PhonePe Standard Checkout
+
+Checkout starts a PhonePe PG session on the server. Customers can choose UPI, QR, cards, or net banking in the PhonePe hosted checkout. The server checks the final order state and amount with PhonePe before marking it paid.
+
+1. In PhonePe Business, complete merchant onboarding and obtain the Standard Checkout Client ID, Client Secret, and Client Version. Never paste the Client Secret into HTML, GitHub, or chat.
+2. Add these private environment variables in Render: PHONEPE_CLIENT_ID, PHONEPE_CLIENT_SECRET, PHONEPE_CLIENT_VERSION, PHONEPE_ENV=SANDBOX while testing, and SHIPPING_FEE_INR=150 for India; INTERNATIONAL_RATE_PER_KG_INR=700 for international courier, charged per started kg with a 1 kg minimum.
+3. Deploy the Node Web Service and verify a sandbox payment. Switch to production credentials and PHONEPE_ENV=PRODUCTION only after PhonePe enables your live account.
+4. Add a persistent order database and PhonePe webhook before relying on payment records for live operations. The current checkout keeps pending checkout sessions in server memory, so a service restart during payment requires the customer to contact the shop for reconciliation.
+
+The local file:// preview cannot call the payment server. Run npm start and open http://localhost:3000/cart.html, or use the deployed Render service. Checkout needs the PhonePe merchant credentials above.
+
+## Static UPI QR fallback
+
+The checkout also displays the shop-provided QR image (payee RJ Moshe, UPI ID hazina.mew-3@okhdfcbank), a copy-UID action, and an amount-filled UPI app link. The amount displayed includes the current cart items and shipping (₹150 within India; international courier ₹700 per started kg with a minimum charge of 1 kg). Customers can send their UTR/reference with the order through WhatsApp to +91 84386 06950. This QR path is a manual payment flow: do not mark an order paid until the bank receipt is checked. Automatic payment confirmation requires configured PhonePe Standard Checkout credentials and a successful server-side status check. The QR image is images/upi-payment-qr.jpeg.
+
+## Sending UPI payment proof
+
+After a customer pays the static QR, checkout lets them select the successful payment screenshot and share it with the order details. On browsers that support file sharing, the native share sheet opens; the customer must choose WhatsApp Business and the shop chat (+91 84386 06950). Otherwise, the direct WhatsApp chat opens with the order details and the customer must attach the selected image in WhatsApp. The site cannot automatically capture a screenshot from GPay or read/verify the payment. A customer message or screenshot does not confirm receipt; the shop must verify the credit in its bank account before confirming the order.
+
+
+## Manual bank transfer
+
+The checkout also displays the shop-provided SBI account (Muhaseena A, account number 20282840630, IFSC SBIN0003274, Besant Nagar branch). Bank transfers are manual; verify the credit before confirming an order.

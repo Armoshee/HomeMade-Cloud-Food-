@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products | HomeMade Cloud Food</title>
     <link rel="stylesheet" href="site.css">
+    <link rel="icon" href="home-made-cloud-icon.svg" type="image/svg+xml">
 </head>
 <body>
     <nav>
-        <div class="logo">HomeMade Cloud Food</div>
+        <a class="brand" href="index.html" aria-label="HomeMade Cloud Food home">
+            <img class="brand-logo" src="home-made-cloud-logo.svg" alt="HomeMade Cloud Food logo">
+        </a>
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="products.html">Products</a></li>
@@ -19,10 +22,17 @@
     </nav>
 
     <section class="products" id="products">
-        <h2>Our Products</h2>
+        <h2 id="products-title">Our Products</h2>
+        <p class="collection-description" id="collection-description">Browse our full range of traditional pickles, sambal and thokku.</p>
+        <nav class="collection-filters" aria-label="Filter products by collection">
+            <a href="products.html" data-category="all">All Products</a>
+            <a href="products.html?category=pickles" data-category="pickles">Traditional Pickles</a>
+            <a href="products.html?category=sambal" data-category="sambal">Sambal Collection</a>
+            <a href="products.html?category=thokku" data-category="thokku">Thokku &amp; More</a>
+        </nav>
 
         <div class="card-container">
-            <div class="card">
+            <div class="card" data-category="pickles">
                 <img src="Chicken Pickels.jpeg" alt="Chicken Pickle">
                 <h3>Chicken Pickle</h3>
                 <p>Traditional spicy Chicken pickle.</p>
@@ -30,7 +40,7 @@
                 <p class="price">₹300</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="pickles">
                 <img src="Beef Pickle.jpeg" alt="Beef Pickle">
                 <h3>Beef Pickle</h3>
                 <p>Fresh Beef pickle with rich flavor.</p>
@@ -38,7 +48,7 @@
                 <p class="price">₹380</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="pickles">
                 <img src="Mutton Pickles.jpeg" alt="Mutton Pickle">
                 <h3>Mutton Pickle</h3>
                 <p>Homemade Mutton pickle with authentic taste.</p>
@@ -46,7 +56,7 @@
                 <p class="price">₹700</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="pickles">
                 <img src="Prawn Pickle.jpeg" alt="Prawn Pickle">
                 <h3>Prawn Pickle</h3>
                 <p>Fresh Prawn pickle with rich flavor.</p>
@@ -54,7 +64,7 @@
                 <p class="price">₹400</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="pickles">
                 <img src="Fish Pickles.jpeg" alt="Fish Pickle">
                 <h3>Fish Pickle</h3>
                 <p>Fresh Fish pickle with rich flavor.</p>
@@ -62,7 +72,7 @@
                 <p class="price">₹500</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="sambal">
                 <img src="Beef Sambal .jpeg" alt="Beef Sambal">
                 <h3>Beef Sambal</h3>
                 <p>Fresh Beef Sambal with rich flavor.</p>
@@ -70,7 +80,7 @@
                 <p class="price">₹400</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="sambal">
                 <img src="Chicken Sambal.jpeg" alt="Chicken Sambal">
                 <h3>Chicken Sambal</h3>
                 <p>Fresh Chicken Sambal with rich flavor.</p>
@@ -78,7 +88,7 @@
                 <p class="price">₹250</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="sambal">
                 <img src="Fish Dry Sambal.jpeg" alt="Fish Dry Sambal">
                 <h3>Fish Dry Sambal</h3>
                 <p>Fresh Fish Dry Sambal with rich flavor.</p>
@@ -86,7 +96,7 @@
                 <p class="price">₹320</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="sambal">
                 <img src="Prawn Sambal .jpeg" alt="Prawn Sambal">
                 <h3>Prawn Sambal</h3>
                 <p>Fresh Prawn Sambal with rich flavor.</p>
@@ -94,7 +104,7 @@
                 <p class="price">₹350</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="sambal">
                 <img src="Squid Sambal.jpeg" alt="Squid Sambal">
                 <h3>Squid Sambal</h3>
                 <p>Fresh Squid Sambal with rich flavor.</p>
@@ -102,7 +112,7 @@
                 <p class="price">₹350</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="sambal">
                 <img src="Nethli Dry fish sambal.jpeg" alt="Nethli Dry Fish Sambal">
                 <h3>Nethli Dry Fish Sambal</h3>
                 <p>Fresh Nethli Dry fish sambal with rich flavor.</p>
@@ -110,7 +120,7 @@
                 <p class="price">₹350</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="thokku">
                 <img src="Kongu Nadu Pirandai Thokku.jpeg" alt="Kongu Nadu Pirandai Thokku">
                 <h3>Kongu Nadu Pirandai Thokku</h3>
                 <p>Fresh Kongu Nadu Pirandai Thokku with rich flavor.</p>
@@ -118,7 +128,7 @@
                 <p class="price">₹220</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="thokku">
                 <img src="Madurai Chinna Vengayam Thokku.jpeg" alt="Madurai Chinna Vengayam Thokku">
                 <h3>Madurai Chinna Vengayam Thokku</h3>
                 <p>Fresh Madurai Chinna Vengayam Thokku with rich flavor.</p>
@@ -126,7 +136,7 @@
                 <p class="price">₹210</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="thokku">
                 <img src="Mylapore Vatha Kolambu.jpeg" alt="Mylapore Vatha Kolambu">
                 <h3>Mylapore Vatha Kolambu</h3>
                 <p>Fresh Mylapore Vatha Kolambu with rich flavor.</p>
@@ -134,7 +144,7 @@
                 <p class="price">₹190</p>
             </div>
 
-            <div class="card">
+            <div class="card" data-category="thokku">
                 <img src="Rameshwaram Poondu Thokku.jpeg" alt="Rameshwaram Poondu Thokku">
                 <h3>Rameshwaram Poondu Thokku</h3>
                 <p>Traditional garlic thokku, packed fresh • 150g.</p>
@@ -149,6 +159,22 @@
     </footer>
 <script>
 (() => {
+    const categories = {
+        all: { title: "Our Products", description: "Browse our full range of traditional pickles, sambal and thokku." },
+        pickles: { title: "Traditional Pickles", description: "Explore our traditional pickle favourites." },
+        sambal: { title: "Sambal Collection", description: "Browse our savoury sambal collection." },
+        thokku: { title: "Thokku & More", description: "Discover thokku and other traditional favourites." }
+    };
+    const requestedCategory = new URLSearchParams(window.location.search).get("category");
+    const selectedCategory = Object.hasOwn(categories, requestedCategory) ? requestedCategory : "all";
+    document.getElementById("products-title").textContent = categories[selectedCategory].title;
+    document.getElementById("collection-description").textContent = categories[selectedCategory].description;
+    document.querySelectorAll(".card[data-category]").forEach((card) => {
+        card.hidden = selectedCategory !== "all" && card.dataset.category !== selectedCategory;
+    });
+    document.querySelectorAll(".collection-filters a").forEach((link) => {
+        if (link.dataset.category === selectedCategory) link.setAttribute("aria-current", "page");
+    });
     const key = "cloudFoodPicklesCart";
     let cart = {};
     try { cart = JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch {}

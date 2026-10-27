@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product | HomeMade Cloud Food</title>
     <link rel="stylesheet" href="site.css">
+    <link rel="icon" href="home-made-cloud-icon.svg" type="image/svg+xml">
 </head>
 <body>
     <nav>
-        <div class="logo">HomeMade Cloud Food</div>
+        <a class="brand" href="index.html" aria-label="HomeMade Cloud Food home">
+            <img class="brand-logo" src="home-made-cloud-logo.svg" alt="HomeMade Cloud Food logo">
+        </a>
         <ul>
             <li><a href="index.html">Home</a></li>
             <li><a href="products.html">Products</a></li>
@@ -56,6 +59,11 @@
         refreshCount();
         return;
     }
+    const productId = product.name === "Mutton Pickle" ? "mutton-pickles" : product.name === "Fish Pickle" ? "fish-pickles" : idFor(product.name);
+    const baseGrams = Number.parseInt(product.pack, 10);
+    const packSizes = [...new Set([baseGrams, 250, 500, 950, 1000])].sort((a, b) => a - b);
+    const priceForGrams = (grams) => Math.round(product.price * grams / baseGrams);
+    const packLabel = (grams) => grams === 1000 ? "1000 g (1 kg)" : `${grams} g`;
     const storageText = product.kind === "sambal"
         ? "Store sealed packs at room temperature, away from direct sunlight. Refrigerate after opening and use a clean, dry spoon."
         : "Keep refrigerated. Avoid storing at room temperature or in direct sunlight. After opening, keep refrigerated and use a clean, dry spoon.";
@@ -66,21 +74,31 @@
             <h1>${product.name}</h1>
             <p>${product.description}</p>
             <div class="product-claims"><span>Made with gingelly oil</span><span>No added preservatives</span><span>No mustard oil</span></div>
-            <section class="detail-info"><h2>Ingredients</h2><p>${product.ingredients}</p></section>
-            <section class="detail-info"><h2>Storage</h2><p>${storageText}</p><p class="detail-note">Unopened shelf life: 3 months from the manufacturing date, as provided by the seller. Once opened: consume within 30–45 days, if this period is validated for the final recipe and packaging.</p></section>
-            <section class="detail-rate"><h2>Rate Card</h2><p><span>Pack size</span><strong>${product.pack}</strong></p><p><span>Price</span><strong>${product.rate || `₹${product.price}`}</strong></p></section>
+            <section class="detail-rate"><h2>Rate Card</h2><label for="product-pack-size">Quantity</label><select id="product-pack-size" aria-label="Quantity in grams">${packSizes.map((grams) => `<option value="${grams}" ${grams === baseGrams ? "selected" : ""}>${packLabel(grams)}</option>`).join("")}</select><p><span>Amount</span><strong id="selected-pack-price">₹${product.price}</strong></p></section>
+            <section class="delivery-estimate-card"><strong>Expected delivery</strong><span id="product-delivery-estimate"></span></section>
+            <div class="product-detail-accordions"><details><summary>Description</summary><p>${product.description}</p></details><details><summary>Key Ingredients</summary><p>${product.ingredients}</p></details><details><summary>How to use</summary><p>Enjoy as an accompaniment to rice, idli, dosa, or your usual meal. Use a clean, dry spoon.</p></details><details><summary>Shelf life &amp; storage</summary><p>${storageText} Check the best-before date printed on the pack.</p></details></div>
             <div class="product-actions">
                 <button class="add-cart-button" type="button" data-action="add">Add to Cart</button>
                 <button class="buy-now-button" type="button" data-action="buy">Buy Now</button>
             </div>
             <a class="back-products" href="products.html">← Back to Products</a>
         </div>`;
+    const packSelect = panel.querySelector("#product-pack-size");
+    const dateFormat = new Intl.DateTimeFormat("en-IN", { day:"numeric", month:"short", year:"numeric" });
+    const deliveryStart = new Date(); deliveryStart.setHours(12,0,0,0); deliveryStart.setDate(deliveryStart.getDate() + 9);
+    const deliveryEnd = new Date(); deliveryEnd.setHours(12,0,0,0); deliveryEnd.setDate(deliveryEnd.getDate() + 13);
+    panel.querySelector("#product-delivery-estimate").textContent = `Between ${dateFormat.format(deliveryStart)} and ${dateFormat.format(deliveryEnd)} in India. International delivery dates vary by destination.`;
+    packSelect.addEventListener("change", () => {
+        panel.querySelector("#selected-pack-price").textContent = `₹${priceForGrams(Number(packSelect.value))}`;
+    });
     panel.addEventListener("click", (event) => {
         const button = event.target.closest("[data-action]");
         if (!button) return;
-        const id = idFor(product.name);
+        const selectedGrams = Number(packSelect.value);
+        const selectedPrice = priceForGrams(selectedGrams);
+        const id = `${productId}__${selectedGrams}g`;
         if (button.dataset.action === "buy") cart = {};
-        if (!cart[id]) cart[id] = { name: product.name, price: product.price, qty: 0 };
+        if (!cart[id]) cart[id] = { name: `${product.name} (${packLabel(selectedGrams)})`, price: selectedPrice, qty: 0, productId, packGrams: selectedGrams };
         cart[id].qty += 1;
         try { localStorage.setItem(cartKey, JSON.stringify(cart)); } catch {}
         refreshCount();
@@ -93,6 +111,7 @@
 </script>
 </body>
 </html>
+
 
 
 
