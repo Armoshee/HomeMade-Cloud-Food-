@@ -212,66 +212,6 @@ async function notifyBusiness(order) {
     return orderId;
 }
 
-const pendingPhonePeOrders = new Map();
-
-function phonePeConfig() {
-    const clientId = process.env.PHONEPE_CLIENT_ID || '';
-    const clientSecret = process.env.PHONEPE_CLIENT_SECRET || '';
-    const clientVersion = process.env.PHONEPE_CLIENT_VERSION || '';
-    if (!clientId || !clientSecret || !clientVersion) throw new Error('PhonePe PG is not configured yet. Contact us on WhatsApp to order.');
-    const sandbox = (process.env.PHONEPE_ENV || 'SANDBOX').toUpperCase() !== 'PRODUCTION';
-    return { clientId, clientSecret, clientVersion, baseUrl: sandbox ? 'https://api-preprod.phonepe.com/apis/pg-sandbox' : 'https://api.phonepe.com/apis/pg' };
-}
-async function phonePeToken(config) {
-    const form = new URLSearchParams({ client_id: config.clientId, client_version: config.clientVersion, client_secret: config.clientSecret, grant_type: 'client_credentials' });
-    const response = await fetch(config.baseUrl + '/v1/oauth/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: form, signal: AbortSignal.timeout(15000) });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok || !result.access_token) throw new Error('PhonePe authorization failed. Check private merchant credentials and environment.');
-    return result.access_token;
-}
-async function handleCreatePaymentOrder(req, res) {
-    try {
-        const config = phonePeConfig();
-        const order = validateOrder(await readJson(req));
-        const token = await phonePeToken(config);
-        const merchantOrderId = 'HCF' + Date.now().toString(36).toUpperCase() + crypto.randomBytes(4).toString('hex').toUpperCase();
-        const origin = (req.headers['x-forwarded-proto'] || 'https') + '://' + req.headers.host;
-        const response = await fetch(config.baseUrl + '/checkout/v2/pay', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'O-Bearer ' + token },
-            body: JSON.stringify({ merchantOrderId, amount: order.total * 100, expireAfter: 1200, metaInfo: { udf1: 'HomeMade Cloud Food' }, paymentFlow: { type: 'PG_CHECKOUT', message: 'HomeMade Cloud Food order', merchantUrls: { redirectUrl: origin + '/cart.html?phonepe_order=' + encodeURIComponent(merchantOrderId) }, paymentModeConfig: { version: 'V2', enabledPaymentModes: [{ type: 'UPI', flows: ['INTENT', 'QR'] }, { type: 'CARD' }, { type: 'NET_BANKING' }] } } }),
-            signal: AbortSignal.timeout(15000)
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok || !result.redirectUrl) { console.error('PhonePe pay request failed:', response.status); throw new Error('PhonePe could not start checkout. Check merchant account configuration.'); }
-        pendingPhonePeOrders.set(merchantOrderId, { ...order, createdAt: Date.now() });
-        sendJson(res, 201, { ok: true, merchantOrderId, redirectUrl: result.redirectUrl });
-    } catch (error) {
-        const clientError = /Enter |invalid|empty|too long|too large|accept the terms|Choose a valid/i.test(error.message);
-        sendJson(res, clientError ? 400 : 503, { ok: false, error: error.message || 'Could not start online payment.' });
-    }
-}
-async function handlePhonePeStatus(req, res) {
-    try {
-        const id = cleanText(new URL(req.url, 'http://localhost').searchParams.get('merchantOrderId'), 64);
-        const order = pendingPhonePeOrders.get(id);
-        if (!order) throw new Error('Checkout session expired on this server. Please contact the shop before paying again.');
-        const config = phonePeConfig();
-        const token = await phonePeToken(config);
-        const response = await fetch(config.baseUrl + '/checkout/v2/order/' + encodeURIComponent(id) + '/status', { headers: { 'Authorization': 'O-Bearer ' + token }, signal: AbortSignal.timeout(15000) });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error('Could not check PhonePe payment status yet. Please retry.');
-        if (result.state === 'COMPLETED') {
-            if (Number(result.amount) !== order.total * 100) throw new Error('Paid amount does not match this order. Contact the shop with your payment reference.');
-            order.id = id; order.displayOrderId = formatOrderReference(id);
-            let businessNotified = false;
-            try { await notifyBusiness(order); businessNotified = true; } catch (error) { console.error('PhonePe payment completed; WhatsApp notification failed:', error.message); }
-            pendingPhonePeOrders.delete(id);
-            return sendJson(res, 200, { ok: true, state: 'COMPLETED', orderId: order.displayOrderId, businessNotified });
-        }
-        if (result.state === 'FAILED' || result.state === 'CANCELLED') pendingPhonePeOrders.delete(id);
-        sendJson(res, 200, { ok: true, state: result.state || 'PENDING' });
-    } catch (error) { sendJson(res, 503, { ok: false, error: error.message || 'Could not verify PhonePe payment.' }); }
-}
 async function handleOrder(req, res) {
     try {
         const body = await readJson(req);
@@ -335,9 +275,6 @@ const server = http.createServer((req, res) => {
         return sendJson(res, 200, { ok: true });
     }
     if ((req.method === "GET" || req.method === "HEAD") && req.url === "/api/store-config") return sendJson(res, 200, { shippingFeeInr: SHIPPING_FEE, internationalRatePerKgInr: INTERNATIONAL_RATE_PER_KG });
-    if ((req.method === "GET" || req.method === "HEAD") && req.url === "/api/payment-config") return sendJson(res, 200, { phonePeReady: Boolean(process.env.PHONEPE_CLIENT_ID && process.env.PHONEPE_CLIENT_SECRET && process.env.PHONEPE_CLIENT_VERSION && (process.env.PHONEPE_ENV || "SANDBOX").toUpperCase() === "PRODUCTION") });
-    if (req.method === "POST" && req.url === "/api/payments/orders") return handleCreatePaymentOrder(req, res);
-    if (req.method === "GET" && req.url.startsWith("/api/payments/status?")) return handlePhonePeStatus(req, res);
     if (req.method === "POST" && req.url === "/api/orders") return handleOrder(req, res);
     if (req.method === "GET" || req.method === "HEAD") return serveStatic(req, res);
     res.writeHead(405, { "Allow": "GET, HEAD, POST" });

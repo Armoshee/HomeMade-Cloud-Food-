@@ -42,15 +42,12 @@
         <label>Order notes (optional)<textarea name="notes" maxlength="300"></textarea></label>
         <label class="terms-check"><input type="checkbox" name="acceptTerms" required> I agree to the <a href="#terms">terms and refund policy</a>.</label>
         <fieldset class="payment-method-selector"><legend>Payment</legend>
-            <label class="payment-option phonepe-payment-option"><input type="radio" name="paymentMethod" value="phonepe" checked disabled><span class="payment-option-copy"><strong>PhonePe PG (UPI, Cards, EMI &amp; NetBanking)</strong><small id="phonepe-availability">Checking PhonePe availability…</small></span><span class="payment-badges" aria-label="UPI, Visa, Mastercard, and more"><span>UPI</span><span>VISA</span><span>MC</span><span>+4</span></span></label>
-            <p class="phonepe-redirect-note">You’ll be redirected to PhonePe PG to complete your purchase. Available payment modes depend on your PhonePe merchant account.</p>
-            <label class="payment-option"><input type="radio" name="paymentMethod" value="upi"><span class="payment-option-copy"><strong>UPI QR / UPI app</strong><small>Pay by scanning the shop’s UPI QR code.</small></span></label>
-            <label class="payment-option"><input type="radio" name="paymentMethod" value="bank"><span class="payment-option-copy"><strong>Bank transfer</strong><small>Transfer to the SBI account and send the payment proof.</small></span></label>
-        </fieldset>        <section id="bank-transfer-details" class="bank-transfer-panel" aria-labelledby="bank-transfer-title" hidden><h3 id="bank-transfer-title">Bank transfer</h3><p>You can also transfer the order total to this State Bank of India account. Please share the transaction reference with your order.</p><dl><div><dt>Account name</dt><dd>Muhaseena A</dd></div><div><dt>Account number</dt><dd>20282840630</dd></div><div><dt>Bank</dt><dd>State Bank of India</dd></div><div><dt>IFSC</dt><dd>SBIN0003274</dd></div><div><dt>Branch</dt><dd>Besant Nagar</dd></div></dl><p class="bank-transfer-note">Orders paid by bank transfer remain pending until the payment is verified by the shop.</p></section>
-        <section id="upi-payment-details" class="upi-qr-panel" aria-labelledby="upi-qr-title" hidden><h3 id="upi-qr-title">Pay by UPI QR</h3><p>Scan with GPay, PhonePe, Paytm, or another UPI app. Enter the total shown below if your app asks for an amount.</p><div class="upi-qr-content"><img src="images/upi-payment-qr.jpeg" alt="UPI payment QR for RJ Moshe" class="upi-qr-image"><div class="upi-qr-details"><p>Payee: <strong>RJ Moshe</strong></p><p>UPI ID: <strong>hazina.mew-3@okhdfcbank</strong></p><p>Amount due: <strong id="upi-amount">₹0</strong></p><div class="upi-qr-actions"><button type="button" class="upi-secondary-button" id="copy-upi-id">Copy UPI ID</button><a class="upi-secondary-button" id="open-upi-app" href="upi://pay?pa=hazina.mew-3%40okhdfcbank&amp;pn=RJ%20Moshe&amp;cu=INR">Open UPI app</a></div><small>The order stays pending until the shop checks the payment in its bank account.</small></div></div></section>
+            <label class="payment-option"><input type="radio" name="paymentMethod" value="upi" checked><span class="payment-option-copy"><strong>Google Pay / UPI QR</strong><small>Scan the shop QR and pay the order total.</small></span><span class="payment-badges" aria-label="Google Pay and UPI"><span>GPay</span><span>UPI</span></span></label>
+            <label class="payment-option"><input type="radio" name="paymentMethod" value="bank"><span class="payment-option-copy"><strong>Bank transfer</strong><small>Transfer to the SBI account and share payment proof.</small></span></label>
+        </fieldset>
+        <section id="bank-transfer-details" class="bank-transfer-panel" aria-labelledby="bank-transfer-title" hidden><h3 id="bank-transfer-title">Bank transfer</h3><p>You can also transfer the order total to this State Bank of India account. Please share the transaction reference with your order.</p><dl><div><dt>Account name</dt><dd>Muhaseena A</dd></div><div><dt>Account number</dt><dd>20282840630</dd></div><div><dt>Bank</dt><dd>State Bank of India</dd></div><div><dt>IFSC</dt><dd>SBIN0003274</dd></div><div><dt>Branch</dt><dd>Besant Nagar</dd></div></dl><p class="bank-transfer-note">Orders paid by bank transfer remain pending until the payment is verified by the shop.</p></section>
+        <section id="upi-payment-details" class="upi-qr-panel" aria-labelledby="upi-qr-title" hidden><h3 id="upi-qr-title">Pay by UPI QR</h3><p>Scan with Google Pay or another UPI app. Enter the total shown below if your app asks for an amount.</p><div class="upi-qr-content"><img src="images/upi-payment-qr.jpeg" alt="UPI payment QR for RJ Moshe" class="upi-qr-image"><div class="upi-qr-details"><p>Payee: <strong>RJ Moshe</strong></p><p>UPI ID: <strong>hazina.mew-3@okhdfcbank</strong></p><p>Amount due: <strong id="upi-amount">₹0</strong></p><div class="upi-qr-actions"><button type="button" class="upi-secondary-button" id="copy-upi-id">Copy UPI ID</button><a class="upi-secondary-button" id="open-upi-app" href="upi://pay?pa=hazina.mew-3%40okhdfcbank&amp;pn=RJ%20Moshe&amp;cu=INR">Open UPI app</a></div><small>The order stays pending until the shop checks the payment in its bank account.</small></div></div></section>
         <section id="manual-payment-proof" class="manual-payment-proof" aria-labelledby="manual-proof-title" hidden><h3 id="manual-proof-title">Share payment proof</h3><p>After paying, add the transaction reference and a successful payment screenshot. Your order stays pending until the shop verifies the payment.</p><label for="manual-payment-reference">Transaction reference / UTR</label><input id="manual-payment-reference" name="upiReference" maxlength="40" autocomplete="off" placeholder="Enter after payment"><label for="manual-payment-image">Payment screenshot</label><input id="manual-payment-image" type="file" accept="image/*"><small>Choose the successful payment screenshot from your device. The browser cannot capture a payment screen automatically.</small><button type="button" class="upi-confirm-button" id="send-payment-confirmation">Share payment proof on WhatsApp</button></section>
-        <button id="phonepe-pay-button" class="place-order-button" type="submit" disabled>Pay now with PhonePe</button>
-        <p class="checkout-note" id="phonepe-note">PhonePe PG is currently unavailable. You can use UPI or bank transfer above.</p>
     </form>
         <p class="checkout-status" id="checkout-status" role="status" aria-live="polite"></p>
         <a class="checkout-whatsapp-link" id="checkout-whatsapp-link" hidden target="_blank" rel="noopener">Contact us on WhatsApp</a>
@@ -60,7 +57,6 @@
     <footer>
         <p>© 2026 HomeMade Cloud Food | Homemade With Love ❤️</p>
     </footer>
-<script src="https://mercury.phonepe.com/web/bundle/checkout.js"></script>
 <script>
 (() => {
     const key = "cloudFoodPicklesCart";
@@ -147,39 +143,13 @@
         try { await navigator.clipboard.writeText("hazina.mew-3@okhdfcbank"); event.currentTarget.textContent = "UPI ID copied"; setTimeout(() => { event.currentTarget.textContent = "Copy UPI ID"; }, 1800); }
         catch { status.textContent = "UPI ID: hazina.mew-3@okhdfcbank"; }
     });
-    const phonePeOption = form.querySelector('input[name="paymentMethod"][value="phonepe"]');
-    const upiOption = form.querySelector('input[name="paymentMethod"][value="upi"]');
-    const bankOption = form.querySelector('input[name="paymentMethod"][value="bank"]');
-    const phonePeButton = document.getElementById("phonepe-pay-button");
     const manualProof = document.getElementById("manual-payment-proof");
-    let phonePeReady = false;
     function updatePaymentMethod() {
-        let method = form.querySelector('input[name="paymentMethod"]:checked')?.value || "upi";
-        if (method === "phonepe" && !phonePeReady) { method = "upi"; upiOption.checked = true; }
+        const method = form.querySelector('input[name="paymentMethod"]:checked')?.value || "upi";
         document.getElementById("upi-payment-details").hidden = method !== "upi";
         document.getElementById("bank-transfer-details").hidden = method !== "bank";
-        manualProof.hidden = method === "phonepe";
-        phonePeButton.hidden = method !== "phonepe";
+        manualProof.hidden = false;
     }
-    document.getElementById("send-payment-confirmation").addEventListener("click", () => {
-        if (!entries().length || !form.reportValidity()) return;
-        const method = form.querySelector('input[name="paymentMethod"]:checked')?.value;
-        if (method !== "upi" && method !== "bank") return;
-        const data = new FormData(form); const reference = String(data.get("upiReference") || "").trim();
-        const screenshot = document.getElementById("manual-payment-image").files[0];
-        if (!screenshot) { document.getElementById("manual-payment-image").focus(); status.textContent = "Select the successful payment screenshot to share with your order."; return; }
-        const items = entries(); const subtotal = items.reduce((sum, [, item]) => sum + Number(item.qty) * Number(item.price), 0);
-        const currentShipping = shippingFor(items);
-        const lines = items.map(([, item]) => "- " + item.name + " x " + item.qty + ": " + money.format(item.price * item.qty));
-        const paymentName = method === "bank" ? "Bank transfer" : "UPI QR";
-        const message = [paymentName + " payment proof for HomeMade Cloud Food order (awaiting shop verification).", "Name: " + data.get("customerName"), "Phone: " + data.get("customerPhone"), "Delivery address: " + data.get("address") + ", " + data.get("city") + ", " + (data.get("state") || data.get("stateIndia")) + ", " + data.get("country") + " - " + data.get("pincode"), "Items:", ...lines, "Subtotal: " + money.format(subtotal), "Shipping: " + money.format(currentShipping), "Total paid/due: " + money.format(subtotal + currentShipping), method === "upi" ? "UPI ID: hazina.mew-3@okhdfcbank" : "", reference ? "Transaction reference / UTR: " + reference : "", data.get("notes") ? "Notes: " + data.get("notes") : ""].filter(Boolean).join("\n");
-        if (navigator.canShare && navigator.share && navigator.canShare({ files: [screenshot] })) {
-            navigator.share({ title: "HomeMade Cloud Food payment proof", text: message, files: [screenshot] }).then(() => { status.textContent = "Share sheet opened. Choose WhatsApp Business, select the shop chat (+91 84386 06950), and send. Order remains pending until bank verification."; }).catch(error => { if (error.name !== "AbortError") status.textContent = "Sharing was not completed. Open WhatsApp Business and attach the selected screenshot to +91 84386 06950."; });
-        } else {
-            window.open("https://wa.me/918438606950?text=" + encodeURIComponent(message), "_blank", "noopener");
-            status.textContent = "WhatsApp chat opened with the order details. Attach the selected payment screenshot in WhatsApp and send it. Order remains pending until bank verification.";
-        }
-    });
     form.addEventListener("change", event => {
         if (event.target.name === "paymentMethod") updatePaymentMethod();
         if (event.target.name === "billingSame") {
@@ -187,22 +157,6 @@
             billingFields.hidden = !different;
             billingFields.querySelectorAll("input,textarea").forEach(el => el.required = different);
         }
-    });
-    fetch("/api/payment-config").then(response => response.json()).then(config => {
-        phonePeReady = config.phonePeReady === true;
-        phonePeOption.disabled = !phonePeReady;
-        phonePeButton.disabled = !phonePeReady;
-        document.getElementById("phonepe-availability").textContent = phonePeReady
-            ? "Secure payment. UPI, cards, EMI and net banking availability depends on your PhonePe account."
-            : "PhonePe PG is not ready for live payments. Choose UPI or bank transfer below.";
-        document.getElementById("phonepe-note").textContent = phonePeReady ? "You will be redirected to PhonePe PG. Other payment methods are available below." : "PhonePe PG is not ready for live payments. You can use UPI or bank transfer below.";
-        if (!phonePeReady) upiOption.checked = true;
-        updatePaymentMethod();
-    }).catch(() => {
-        phonePeOption.disabled = true;
-        document.getElementById("phonepe-availability").textContent = "PhonePe availability could not be checked. UPI and bank transfer are available below.";
-        upiOption.checked = true;
-        updatePaymentMethod();
     });
     function updateCountryFields() {
         const india = countrySelect.value === "India";
@@ -215,55 +169,8 @@
     }
     countrySelect.addEventListener("change", updateCountryFields);
 
-    function whatsappOrderUrl(data, items, orderId) {
-        const subtotal = items.reduce((sum, [, item]) => sum + Number(item.qty) * Number(item.price), 0);
-        const currentShipping = shippingFor(items);
-        const lines = items.map(([, item]) => "- " + item.name + " x " + item.qty + ": " + money.format(item.price * item.qty));
-        const message = [orderId ? "PhonePe payment completed. Order reference: " + orderId : "Hello! I would like to place an order from HomeMade Cloud Food.", "Name: " + data.get("customerName"), "Phone: " + data.get("customerPhone"), "Delivery address: " + data.get("address") + ", " + data.get("city") + ", " + (data.get("state") || data.get("stateIndia")) + ", " + data.get("country") + " - " + data.get("pincode"), "Items:", ...lines, "Subtotal: " + money.format(subtotal), "Shipping: " + money.format(currentShipping), "Total: " + money.format(subtotal + currentShipping), data.get("notes") ? "Notes: " + data.get("notes") : ""].filter(Boolean).join("\n");
-        return "https://wa.me/918438606950?text=" + encodeURIComponent(message);
-    }
-    async function checkPayment(id) {
-        const response = await fetch("/api/payments/status?merchantOrderId=" + encodeURIComponent(id));
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.error || "Could not verify payment yet.");
-        return result;
-    }
-    const returnedOrder = new URLSearchParams(location.search).get("phonepe_order");
-    if (returnedOrder) {
-        status.textContent = "PhonePe returned. Verifying payment securely…";
-        checkPayment(returnedOrder).then(result => {
-            if (result.state === "COMPLETED") { cart = {}; save(); render(); status.textContent = "Payment verified. Order reference: " + result.orderId + "."; }
-            else if (result.state === "FAILED" || result.state === "CANCELLED") status.textContent = "Payment was not completed. Your cart is still saved; you can try again.";
-            else status.textContent = "Payment is still processing. Refresh this page in a moment to check again.";
-        }).catch(error => { status.textContent = error.message; });
-        history.replaceState({}, "", location.pathname);
-    }
-    form.addEventListener("submit", async event => {
-        event.preventDefault();
-        const items = entries();
-        if (!items.length || !form.reportValidity()) return;
-        const data = new FormData(form);
-        if (data.get("paymentMethod") !== "phonepe") { status.textContent = "Complete payment using the selected method and share its proof above."; return; }
-        const button = phonePeButton;
-        button.disabled = true;
-        button.textContent = "Opening PhonePe checkout…"; status.textContent = ""; whatsappLink.hidden = true;
-        try {
-            const response = await fetch("/api/payments/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerName: data.get("customerName"), customerPhone: data.get("customerPhone"), pincode: data.get("pincode"), address: data.get("address"), city: data.get("city"), state: data.get("state") || data.get("stateIndia"), country: data.get("country"), notes: data.get("notes") || "", shippingMethod: data.get("shippingMethod"), billingSame: data.get("billingSame") === "yes", billingAddress: data.get("billingAddress") || "", billingCity: data.get("billingCity") || "", billingState: data.get("billingState") || "", billingCountry: data.get("billingCountry") || "", billingPincode: data.get("billingPincode") || "", acceptTerms: data.get("acceptTerms") === "on", items: items.map(([id, item]) => ({ id: item.productId || id.replace(/__(?:250|500|950|1000)g$/, ""), grams: item.packGrams || null, qty: item.qty })) }) });
-            const result = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(result.error || "PhonePe checkout is not configured yet.");
-            if (!window.PhonePeCheckout) throw new Error("PhonePe checkout could not load. Please try again or contact us.");
-            window.PhonePeCheckout.transact({ tokenUrl: result.redirectUrl, type: "IFRAME", callback: async () => {
-                status.textContent = "Checking payment with PhonePe…";
-                try { const paid = await checkPayment(result.merchantOrderId); if (paid.state === "COMPLETED") { cart = {}; save(); render(); status.textContent = "Payment verified. Order reference: " + paid.orderId + "."; } else status.textContent = "Payment was not completed yet. Your cart is still saved."; }
-                catch (error) { status.textContent = error.message; }
-            } });
-        } catch (error) {
-            status.textContent = error.message || "Online payment could not start.";
-            whatsappLink.href = whatsappOrderUrl(data, items);
-            whatsappLink.textContent = "Place this order through WhatsApp";
-            whatsappLink.hidden = false;
-        } finally { button.disabled = false; button.textContent = "Pay now with PhonePe"; }
-    });
+    form.addEventListener("submit", event => { event.preventDefault(); status.textContent = "Choose Google Pay/UPI or bank transfer and share the payment proof above."; });
+    updatePaymentMethod();
     updateCountryFields();
     fetch("/api/store-config").then(response => response.json()).then(config => { if (Number.isFinite(Number(config.shippingFeeInr)) && Number(config.shippingFeeInr) >= 0) shippingFee = Number(config.shippingFeeInr); if (Number.isFinite(Number(config.internationalRatePerKgInr)) && Number(config.internationalRatePerKgInr) > 0) internationalRatePerKg = Number(config.internationalRatePerKgInr); render(); }).catch(() => render());
 })();
