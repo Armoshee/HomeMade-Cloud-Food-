@@ -169,7 +169,33 @@
     }
     countrySelect.addEventListener("change", updateCountryFields);
 
-    form.addEventListener("submit", event => { event.preventDefault(); status.textContent = "Choose Google Pay/UPI or bank transfer and share the payment proof above."; });
+    form.addEventListener("submit", event => { event.preventDefault(); document.getElementById("send-payment-confirmation").click(); });
+    document.getElementById("send-payment-confirmation").addEventListener("click", async () => {
+        if (!form.reportValidity()) return;
+        const fields = new FormData(form);
+        const paymentMethod = fields.get("paymentMethod") === "bank" ? "SBI bank transfer" : "UPI QR";
+        const reference = String(fields.get("upiReference") || "").trim();
+        const fileInput = document.getElementById("manual-payment-image");
+        const items = entries();
+        if (!items.length) { status.textContent = "Your cart is empty."; return; }
+        if (!reference) { status.textContent = "Enter the payment transaction reference / UTR."; document.getElementById("manual-payment-reference").focus(); return; }
+        const itemText = items.map(([, item]) => `${item.name} x ${item.qty} — ${money.format(item.price * item.qty)}`).join("\n");
+        const addressParts = [fields.get("address"), fields.get("city"), fields.get("state"), fields.get("country"), fields.get("pincode")].filter(Boolean);
+        const message = ["New pending website order — HomeMade Cloud Food", `Customer: ${fields.get("customerName")}`, `Phone: ${fields.get("customerPhone")}`, `Delivery address: ${addressParts.join(", ")}`, `Items:\n${itemText}`, `Subtotal: ${subtotalLabel.textContent}`, `Shipping: ${shippingFeeLabel.textContent}`, `Total: ${totalLabel.textContent}`, `Payment method: ${paymentMethod}`, `Transaction reference / UTR: ${reference}`, fields.get("notes") ? `Notes: ${fields.get("notes")}` : "", "Please verify the payment and reply with order approval. This order is not confirmed until the shop verifies payment."].filter(Boolean).join("\n");
+        const whatsappUrl = `https://wa.me/918438606950?text=${encodeURIComponent(message)}`;
+        const screenshot = fileInput.files && fileInput.files[0];
+        if (screenshot && navigator.share && navigator.canShare) {
+            try {
+                const shareData = { title: "Payment proof", text: message, files: [screenshot] };
+                if (navigator.canShare(shareData)) { await navigator.share(shareData); status.textContent = "Choose WhatsApp Business to send the order and payment screenshot. The shop will confirm after checking payment."; return; }
+            } catch (error) { if (error && error.name === "AbortError") return; }
+        }
+        whatsappLink.href = whatsappUrl;
+        whatsappLink.textContent = "Open WhatsApp to send order details";
+        whatsappLink.hidden = false;
+        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+        status.textContent = screenshot ? "WhatsApp opened with order details. Attach your selected payment screenshot there, then send the message." : "WhatsApp opened with order details. Send the message; attach your payment screenshot if available.";
+    });
     updatePaymentMethod();
     updateCountryFields();
     fetch("/api/store-config").then(response => response.json()).then(config => { if (Number.isFinite(Number(config.shippingFeeInr)) && Number(config.shippingFeeInr) >= 0) shippingFee = Number(config.shippingFeeInr); if (Number.isFinite(Number(config.internationalRatePerKgInr)) && Number(config.internationalRatePerKgInr) > 0) internationalRatePerKg = Number(config.internationalRatePerKgInr); render(); }).catch(() => render());
