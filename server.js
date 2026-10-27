@@ -335,7 +335,8 @@ const server = http.createServer((req, res) => {
         return sendJson(res, 200, { ok: true });
     }
     if ((req.method === "GET" || req.method === "HEAD") && req.url === "/api/store-config") return sendJson(res, 200, { shippingFeeInr: SHIPPING_FEE, internationalRatePerKgInr: INTERNATIONAL_RATE_PER_KG });
-if (req.method === "POST" && req.url === "/api/payments/orders") return handleCreatePaymentOrder(req, res);
+    if ((req.method === "GET" || req.method === "HEAD") && req.url === "/api/payment-config") return sendJson(res, 200, { phonePeReady: Boolean(process.env.PHONEPE_CLIENT_ID && process.env.PHONEPE_CLIENT_SECRET && process.env.PHONEPE_CLIENT_VERSION && (process.env.PHONEPE_ENV || "SANDBOX").toUpperCase() === "PRODUCTION") });
+    if (req.method === "POST" && req.url === "/api/payments/orders") return handleCreatePaymentOrder(req, res);
     if (req.method === "GET" && req.url.startsWith("/api/payments/status?")) return handlePhonePeStatus(req, res);
     if (req.method === "POST" && req.url === "/api/orders") return handleOrder(req, res);
     if (req.method === "GET" || req.method === "HEAD") return serveStatic(req, res);
