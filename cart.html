@@ -44,7 +44,7 @@
         <label class="terms-check"><input type="checkbox" name="acceptTerms" required> I agree to the <a href="#terms">terms and refund policy</a>.</label>
         <label class="terms-check"><input type="checkbox" name="acceptWhatsAppApproval" required> Send me the payment verification and order approval update on WhatsApp at the number above.</label>
         <section class="bank-transfer-panel" aria-labelledby="bank-transfer-title"><h3 id="bank-transfer-title">Bank transfer</h3><p>You can also transfer the order total to this State Bank of India account. Please share the transaction reference with your order.</p><dl><div><dt>Account name</dt><dd>Muhaseena A</dd></div><div><dt>Account number</dt><dd>20282840630</dd></div><div><dt>Bank</dt><dd>State Bank of India</dd></div><div><dt>IFSC</dt><dd>SBIN0003274</dd></div><div><dt>Branch</dt><dd>Besant Nagar</dd></div></dl><p class="bank-transfer-note">Orders paid by bank transfer remain pending until the payment is verified by the shop.</p></section>
-        <button class="place-order-button" type="button" id="show-upi-payment">Pay now</button><section class="upi-qr-panel" aria-labelledby="upi-qr-title"><h3 id="upi-qr-title">Pay by UPI QR</h3><p>Scan with GPay, PhonePe, Paytm, or another UPI app. Enter the total shown below if your app asks for an amount.</p><div class="upi-qr-content"><img src="images/upi-payment-qr.jpeg" alt="UPI payment QR for RJ Moshe" class="upi-qr-image" id="upi-qr-image" hidden><div class="upi-qr-details" id="upi-qr-details-panel" hidden><p>Payee: <strong>RJ Moshe</strong></p><p>UPI ID: <strong>hazina.mew-3@okhdfcbank</strong></p><p>Amount due: <strong id="upi-amount">₹0</strong></p><div class="upi-qr-actions"><button type="button" class="upi-secondary-button" id="copy-upi-id">Copy UPI ID</button><a class="upi-secondary-button" id="open-upi-app" href="upi://pay?pa=hazina.mew-3%40okhdfcbank&amp;pn=RJ%20Moshe&amp;cu=INR">Open UPI app</a></div><label for="upi-reference">UPI transaction reference / UTR</label><input id="upi-reference" name="upiReference" maxlength="40" autocomplete="off" placeholder="Enter after payment"><label for="upi-proof-image">Payment screenshot</label><input id="upi-proof-image" type="file" accept="image/*"><small>After paying, select the success screenshot from your device. Then share it to WhatsApp Business at +91 84386 06950. Your browser cannot capture the GPay screen by itself.</small><button type="button" class="upi-confirm-button" id="send-upi-confirmation">Share payment proof on WhatsApp</button><small>The order stays pending until the shop checks the bank credit and approves it. An approval update will then be sent to your WhatsApp.</small></div></div></section>
+        <button class="place-order-button" type="button" id="show-upi-payment">Pay now</button><section class="upi-qr-panel" aria-labelledby="upi-qr-title"><h3 id="upi-qr-title">Pay by UPI QR</h3><p>Scan with GPay, PhonePe, Paytm, or another UPI app. Enter the total shown below if your app asks for an amount.</p><div class="upi-qr-content"><img src="images/upi-payment-qr.jpeg" alt="UPI payment QR for RJ Moshe" class="upi-qr-image" id="upi-qr-image" hidden><div class="upi-qr-details" id="upi-qr-details-panel" hidden><p>Payee: <strong>RJ Moshe</strong></p><p>UPI ID: <strong>hazina.mew-3@okhdfcbank</strong></p><p>Amount due: <strong id="upi-amount">₹0</strong></p><div class="upi-qr-actions"><button type="button" class="upi-secondary-button" id="copy-upi-id">Copy UPI ID</button><a class="upi-secondary-button" id="open-upi-app" href="upi://pay?pa=hazina.mew-3%40okhdfcbank&amp;pn=RJ%20Moshe&amp;cu=INR">Open UPI app</a></div><label for="upi-reference">UPI transaction reference / UTR</label><input id="upi-reference" name="upiReference" maxlength="40" autocomplete="off" placeholder="Enter after payment"><label for="upi-proof-image">Payment screenshot</label><input id="upi-proof-image" type="file" accept="image/jpeg,image/png"><small>After paying, choose the successful GPay, PhonePe, or UPI screenshot. The site sends it with your order details to the shop's WhatsApp.</small><button type="button" class="upi-confirm-button" id="send-upi-confirmation">Send screenshot and order</button><small>Your order remains pending until the shop checks the payment and taps Approve. Then you will receive an order confirmation on WhatsApp.</small></div></div></section>
         <button class="place-order-button" type="submit">Pay securely with PhonePe</button>
         <p class="checkout-note">Continue to PhonePe secure checkout. UPI QR, UPI apps, cards, and net banking appear when enabled on your PhonePe PG account.</p>
     </form>
@@ -82,6 +82,9 @@
     let domesticDeliveryFee = 120;
     const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
     let cart = {};
+    const pendingProofStorageKey = "homeMadeCloudFoodPendingProof";
+    let pendingProofOrder = null;
+    try { pendingProofOrder = JSON.parse(sessionStorage.getItem(pendingProofStorageKey) || "null"); } catch {}
     try { cart = JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch {}
     function entries() { return Object.entries(cart).filter(([, item]) => item && Number(item.qty) > 0); }
     function shippingFor(items, country = countrySelect.value, pincode = postalCode.value) {
@@ -161,31 +164,46 @@
         const data = new FormData(form); const reference = String(data.get("upiReference") || "").trim();
         const screenshot = document.getElementById("upi-proof-image").files[0];
         if (!screenshot) { document.getElementById("upi-proof-image").focus(); status.textContent = "Select the successful UPI payment screenshot to share with your order."; return; }
-        const items = entries(); const subtotal = items.reduce((sum, [, item]) => sum + Number(item.qty) * Number(item.price), 0);
-        const currentShipping = shippingFor(items);
-        const lines = items.map(([, item]) => "- " + item.name + " x " + item.qty + ": " + money.format(item.price * item.qty));
-        const button = document.getElementById("send-upi-confirmation");
-        button.disabled = true;
-        status.textContent = "Saving your order for shop approval…";
-        let pending;
-        try {
-            const response = await fetch("/api/manual-orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkoutPayload(data, items, reference)) });
-            pending = await response.json().catch(() => ({}));
-            if (!response.ok) throw new Error(pending.error || "Could not save this order. Please contact the shop.");
-        } catch (error) {
-            status.textContent = error.message || "The order server is unavailable. Open this page from the live website, not a file preview.";
-            button.disabled = false;
+        if (!/^(image\/jpeg|image\/png)$/.test(screenshot.type) || screenshot.size > 5 * 1024 * 1024) {
+            status.textContent = "Choose a JPG or PNG payment screenshot smaller than 5 MB.";
             return;
         }
-        const chargeDisclosure = deliveryChargeDisclosure(String(data.get("country")), String(data.get("pincode")));
-        const message = ["UPI payment proof for HomeMade Cloud Food order (awaiting shop verification and approval).", "Order reference: " + pending.orderId, "Name: " + data.get("customerName"), "Phone: " + data.get("customerPhone"), "Delivery address: " + data.get("address") + ", " + data.get("city") + ", " + (data.get("state") || data.get("stateIndia")) + ", " + data.get("country") + " - " + data.get("pincode"), "Items:", ...lines, "Subtotal: " + money.format(subtotal), "Delivery charge: " + chargeDisclosure, "Total paid/due: " + money.format(subtotal + currentShipping), "UPI ID: hazina.mew-3@okhdfcbank", reference ? "Transaction reference / UTR: " + reference : "", data.get("notes") ? "Notes: " + data.get("notes") : ""].filter(Boolean).join("\n");
-        if (navigator.canShare && navigator.share && navigator.canShare({ files: [screenshot] })) {
-            navigator.share({ title: "HomeMade Cloud Food payment proof", text: message, files: [screenshot] }).then(() => { status.textContent = "Order " + pending.orderId + " is pending. Send the screenshot to the shop in WhatsApp; the shop will verify payment and approve it before processing."; }).catch(error => { if (error.name !== "AbortError") status.textContent = "Order " + pending.orderId + " is saved. Open WhatsApp Business and attach the selected screenshot to +91 84386 06950."; });
-        } else {
-            window.open("https://wa.me/918438606950?text=" + encodeURIComponent(message), "_blank", "noopener");
-            status.textContent = "Order " + pending.orderId + " is pending. Attach the selected screenshot in WhatsApp and send it; the shop will verify payment and approve before processing.";
+        const items = entries();
+        const orderPayload = checkoutPayload(data, items, reference);
+        const fingerprint = JSON.stringify(orderPayload);
+        const button = document.getElementById("send-upi-confirmation");
+        button.disabled = true;
+        status.textContent = "Sending your payment screenshot to the shop…";
+        let pending;
+        try {
+            if (pendingProofOrder && pendingProofOrder.fingerprint === fingerprint) {
+                pending = pendingProofOrder;
+            } else {
+                const orderResponse = await fetch("/api/manual-orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(orderPayload) });
+                const orderResult = await orderResponse.json().catch(() => ({}));
+                if (!orderResponse.ok) throw new Error(orderResult.error || "Could not save this order. Please contact the shop.");
+                pending = { orderId: orderResult.orderId, proofUploadToken: orderResult.proofUploadToken, fingerprint };
+                pendingProofOrder = pending;
+                try { sessionStorage.setItem(pendingProofStorageKey, JSON.stringify(pending)); } catch {}
+            }
+            const proofResponse = await fetch("/api/manual-orders/" + encodeURIComponent(pending.orderId) + "/payment-proof", {
+                method: "POST",
+                headers: { "Content-Type": screenshot.type, "X-Payment-Proof-Token": pending.proofUploadToken },
+                body: screenshot
+            });
+            const proofResult = await proofResponse.json().catch(() => ({}));
+            if (!proofResponse.ok) throw new Error(proofResult.error || "Could not send the payment screenshot to the shop.");
+            pendingProofOrder = null;
+            try { sessionStorage.removeItem(pendingProofStorageKey); } catch {}
+            cart = {};
+            save();
+            render();
+            status.textContent = "Payment screenshot and order details sent to the shop. Order " + pending.orderId + " is waiting for payment verification. You will receive the order confirmation after the shop taps Approve.";
+        } catch (error) {
+            status.textContent = (pending ? "Order " + pending.orderId + " is saved. " : "") + (error.message || "The shop could not receive the payment screenshot. Please retry.");
+        } finally {
+            button.disabled = false;
         }
-        button.disabled = false;
     });
     function updateCountryFields() {
         const india = countrySelect.value === "India";

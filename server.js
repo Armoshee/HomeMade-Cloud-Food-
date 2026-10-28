@@ -199,10 +199,19 @@ async function sendBusinessTemplate(templateName, language, components) {
 
 async function notifyBusiness(order) {
     const quickReplyTemplate = process.env.WHATSAPP_APPROVAL_QUICK_REPLY_TEMPLATE_NAME || "";
-    const templateName = quickReplyTemplate || process.env.WHATSAPP_TEMPLATE_NAME || "new_order_approval";
-    const language = process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
+    let templateName = quickReplyTemplate || process.env.WHATSAPP_TEMPLATE_NAME || "new_order_approval";
+    let language = process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en_US";
     const publicSiteUrl = String(process.env.PUBLIC_SITE_URL || "");
-    if ((!quickReplyTemplate && !/^https:\/\//i.test(publicSiteUrl)) || !order.approvalToken) {
+    if (!order.approvalToken) {
+        throw new Error("Configure a shop approval action before sending order notifications.");
+    }
+    if (order.paymentMethod === "UPI QR" && (!order.paymentProofMediaId || !order.paymentProofReceivedAt)) {
+        throw new Error("The customer's payment screenshot has not been received yet.");
+    }
+    if (order.paymentMethod === "UPI QR") {
+        templateName = process.env.WHATSAPP_PAYMENT_PROOF_TEMPLATE_NAME || "payment_proof_approval";
+        language = process.env.WHATSAPP_PAYMENT_PROOF_TEMPLATE_LANGUAGE || language;
+    } else if (!quickReplyTemplate && !/^https:\/\//i.test(publicSiteUrl)) {
         throw new Error("Configure the public approval URL or the WhatsApp quick-reply approval template.");
     }
 
@@ -211,10 +220,10 @@ async function notifyBusiness(order) {
     ).join("; ");
     const fullAddress = [order.address, order.city, order.state, order.country, order.pincode].filter(Boolean).join(", ");
     const orderId = order.displayOrderId || formatOrderReference(order.id);
-    const alertType = order.status === "PAID_PENDING_APPROVAL"
+    const alertType = order.paymentMethod === "UPI QR"
+        ? "Payment screenshot received. Check your bank credit before approving. Order " + orderId
+        : order.status === "PAID_PENDING_APPROVAL"
         ? "PhonePe payment received and verified. Order " + orderId
-        : order.paymentMethod === "UPI QR"
-            ? "Customer reports UPI payment; verify bank credit before approval. Order " + orderId
             : "New order submitted; verify payment before approval. Order " + orderId;
     const parameters = [
         alertType,
@@ -226,8 +235,12 @@ async function notifyBusiness(order) {
         ["Subtotal: " + money(order.subtotal), "Delivery: " + money(order.shipping), "Courier: " + order.shippingMethod, order.notes || "", order.billingSame ? "Billing: same as delivery" : "Billing: " + [order.billingAddress, order.billingCity, order.billingState, order.billingCountry, order.billingPincode].filter(Boolean).join(", ")].filter(Boolean).join(" | ")
     ].map((text) => ({ type: "text", text: String(text).slice(0, 1024) }));
 
-    const components = [{ type: "body", parameters }];
-    if (quickReplyTemplate) {
+    const components = [];
+    if (order.paymentMethod === "UPI QR") {
+        components.push({ type: "header", parameters: [{ type: "image", image: { id: order.paymentProofMediaId } }] });
+    }
+    components.push({ type: "body", parameters });
+    if (order.paymentMethod === "UPI QR" || quickReplyTemplate) {
         components.push({ type: "button", sub_type: "quick_reply", index: "0", parameters: [{ type: "payload", payload: "approve:" + order.approvalToken }] });
     } else {
         components.push({ type: "button", sub_type: "url", index: "0", parameters: [{ type: "text", text: order.approvalToken }] });
@@ -355,22 +368,96 @@ async function handleManualOrder(req, res) {
         order.id = crypto.randomUUID();
         order.displayOrderId = formatOrderReference(order.id);
         order.approvalToken = crypto.randomBytes(32).toString("base64url");
+        order.proofUploadToken = crypto.randomBytes(32).toString("base64url");
         order.createdAt = new Date().toISOString();
         order.paymentMethod = "UPI QR";
         order.paymentReference = cleanText(body.paymentReference, 40);
-        order.status = "PENDING_APPROVAL";
+        order.status = "AWAITING_PAYMENT_PROOF";
         order.businessNotified = false;
         order.whatsAppApprovalConsentAt = new Date().toISOString();
         const orders = await readOrders();
         orders.unshift(order);
         await writeOrders(orders);
-        let businessNotified = false;
-        try { await notifyBusinessOnce(order.id); businessNotified = true; }
-        catch (error) { console.error("Manual UPI order saved; shop WhatsApp notification failed:", error.message); }
-        sendJson(res, 201, { ok: true, orderId: order.displayOrderId, businessNotified });
+        sendJson(res, 201, { ok: true, orderId: order.displayOrderId, proofUploadToken: order.proofUploadToken });
     } catch (error) {
         const clientError = /Enter |invalid|empty|too large|accept the terms|Choose a valid/i.test(error.message);
         sendJson(res, clientError ? 400 : 503, { ok: false, error: error.message || "Could not save the order." });
+    }
+}
+
+async function uploadPaymentProofToWhatsApp(image, mimeType) {
+    const token = process.env.WHATSAPP_ACCESS_TOKEN;
+    const senderId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const apiVersion = process.env.WHATSAPP_API_VERSION || "";
+    if (!token || !senderId || !/^v\d+\.\d+$/.test(apiVersion)) {
+        throw new Error("WhatsApp payment-proof delivery is not configured yet.");
+    }
+    const form = new FormData();
+    form.append("messaging_product", "whatsapp");
+    form.append("type", mimeType);
+    form.append("file", new Blob([image], { type: mimeType }), "payment-proof." + (mimeType === "image/png" ? "png" : "jpg"));
+    const response = await fetch("https://graph.facebook.com/" + apiVersion + "/" + senderId + "/media", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+        body: form,
+        signal: AbortSignal.timeout(20000)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.id) {
+        console.error("WhatsApp payment-proof upload failed:", response.status, JSON.stringify(result).slice(0, 500));
+        throw new Error("WhatsApp could not receive the payment screenshot. Please retry or contact the shop.");
+    }
+    return result.id;
+}
+
+async function makePaymentProofApprovable(orderId) {
+    const orders = await readOrders();
+    const order = orders.find(item => item.id === orderId);
+    if (!order || !order.paymentProofMediaId || !order.businessNotified) return false;
+    if (order.status === "AWAITING_PAYMENT_PROOF") {
+        order.status = "PENDING_APPROVAL";
+        await writeOrders(orders);
+    }
+    return true;
+}
+
+async function handleManualPaymentProof(req, res, orderId) {
+    try {
+        const proofToken = String(req.headers["x-payment-proof-token"] || "");
+        const orders = await readOrders();
+        const order = orders.find(item => item.id === orderId || item.displayOrderId === orderId);
+        if (!order || !proofToken || !safeEqualText(order.proofUploadToken, proofToken)) {
+            return sendJson(res, 404, { ok: false, error: "This payment proof request is invalid or expired." });
+        }
+        if (order.paymentMethod !== "UPI QR" || order.status === "APPROVED") {
+            return sendJson(res, 409, { ok: false, error: "This order cannot accept a payment screenshot." });
+        }
+        const mimeType = String(req.headers["content-type"] || "").split(";")[0].toLowerCase();
+        if (mimeType !== "image/jpeg" && mimeType !== "image/png") {
+            return sendJson(res, 400, { ok: false, error: "Choose a JPG, JPEG, or PNG payment screenshot." });
+        }
+        if (order.paymentProofMediaId && order.paymentProofReceivedAt) {
+            await readRawBody(req, 5 * 1024 * 1024);
+            if (!order.businessNotified) await notifyBusinessOnce(order.id);
+            await makePaymentProofApprovable(order.id);
+            return sendJson(res, 200, { ok: true, orderId: order.displayOrderId, alreadyReceived: true });
+        }
+        const image = await readRawBody(req, 5 * 1024 * 1024);
+        if (!image.length) return sendJson(res, 400, { ok: false, error: "The payment screenshot is empty." });
+        const validJpeg = mimeType === "image/jpeg" && image.length >= 3 && image[0] === 0xff && image[1] === 0xd8 && image[2] === 0xff;
+        const validPng = mimeType === "image/png" && image.length >= 8 && image.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+        if (!validJpeg && !validPng) return sendJson(res, 400, { ok: false, error: "The uploaded file is not a valid JPG or PNG image." });
+        const mediaId = await uploadPaymentProofToWhatsApp(image, mimeType);
+        order.paymentProofMediaId = mediaId;
+        order.paymentProofReceivedAt = new Date().toISOString();
+        order.status = "AWAITING_PAYMENT_PROOF";
+        await writeOrders(orders);
+        await notifyBusinessOnce(order.id);
+        await makePaymentProofApprovable(order.id);
+        return sendJson(res, 200, { ok: true, orderId: order.displayOrderId });
+    } catch (error) {
+        const status = /too large/i.test(error.message) ? 413 : 503;
+        sendJson(res, status, { ok: false, error: error.message || "Could not send the payment screenshot." });
     }
 }
 
@@ -378,7 +465,7 @@ async function handleAdminOrders(req, res) {
     if (!requireAdmin(req, res)) return;
     try {
         const orders = await readOrders();
-        sendJson(res, 200, { ok: true, orders: orders.map(({ approvalToken, ...order }) => order) });
+        sendJson(res, 200, { ok: true, orders: orders.map(({ approvalToken, proofUploadToken, ...order }) => order) });
     } catch (error) { sendJson(res, 500, { ok: false, error: error.message }); }
 }
 
@@ -412,6 +499,9 @@ async function handleWhatsAppApproval(req, res, token) {
         if (order.status === "APPROVED") return sendJson(res, 200, { ok: true, orderId: order.displayOrderId, alreadyApproved: true });
         if (order.status !== "PENDING_APPROVAL" && order.status !== "PAID_PENDING_APPROVAL") {
             return sendJson(res, 409, { ok: false, error: "This order is not awaiting approval." });
+        }
+        if (order.paymentMethod === "UPI QR" && !order.paymentProofReceivedAt) {
+            return sendJson(res, 409, { ok: false, error: "The payment screenshot has not been received yet." });
         }
         if (!order.whatsAppApprovalConsentAt) return sendJson(res, 409, { ok: false, error: "The customer did not consent to a WhatsApp approval message." });
         await notifyCustomerApproved(order);
@@ -455,6 +545,7 @@ async function approveOrderFromWhatsAppReply(payload, sender) {
     const { orders, order } = found;
     if (order.status === "APPROVED") return true;
     if (order.status !== "PENDING_APPROVAL" && order.status !== "PAID_PENDING_APPROVAL") return false;
+    if (order.paymentMethod === "UPI QR" && !order.paymentProofReceivedAt) return false;
     if (!order.whatsAppApprovalConsentAt) return false;
     await notifyCustomerApproved(order);
     order.status = "APPROVED";
@@ -533,6 +624,7 @@ async function handleAdminApprove(req, res, orderId) {
         if (!order) return sendJson(res, 404, { ok: false, error: "Order not found." });
         if (order.status === "APPROVED") return sendJson(res, 200, { ok: true, orderId: order.displayOrderId, alreadyApproved: true });
         if (order.status !== "PENDING_APPROVAL" && order.status !== "PAID_PENDING_APPROVAL") return sendJson(res, 409, { ok: false, error: "This order is not awaiting approval." });
+        if (order.paymentMethod === "UPI QR" && !order.paymentProofReceivedAt) return sendJson(res, 409, { ok: false, error: "The payment screenshot has not been received yet." });
         if (!order.whatsAppApprovalConsentAt) return sendJson(res, 409, { ok: false, error: "The customer did not consent to a WhatsApp approval message." });
         await notifyCustomerApproved(order);
         order.status = "APPROVED";
@@ -760,6 +852,8 @@ const server = http.createServer((req, res) => {
     if (req.method === "POST" && req.url === "/api/phonepe/webhook") return handlePhonePeWebhook(req, res);
     if (req.method === "POST" && req.url === "/api/site-visit") return handleSiteVisit(req, res);
     if (req.method === "POST" && req.url === "/api/manual-orders") return handleManualOrder(req, res);
+    const proofUploadMatch = req.method === "POST" && req.url.match(/^\/api\/manual-orders\/([^/]+)\/payment-proof$/);
+    if (proofUploadMatch) return handleManualPaymentProof(req, res, decodeURIComponent(proofUploadMatch[1]));
     if (req.method === "GET" && req.url === "/api/admin/orders") return handleAdminOrders(req, res);
     const approvalApiMatch = req.url.match(/^\/api\/order-approval\/([A-Za-z0-9_-]+)$/);
     if (approvalApiMatch && (req.method === "GET" || req.method === "POST")) return handleWhatsAppApproval(req, res, approvalApiMatch[1]);

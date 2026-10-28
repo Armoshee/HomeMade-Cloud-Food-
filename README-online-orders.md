@@ -7,7 +7,7 @@ This folder contains the website and a Node.js server. Customers can add product
 - Add to Cart, Buy Now, quantity controls, and order totals.
 - Checkout form for customer name, phone, delivery address, city, PIN code, and notes.
 - Server-side product and price validation.
-- WhatsApp Business Platform alerts to the shop for PhonePe payments confirmed by PhonePe, manual payment-verification requests, and website visits.
+- WhatsApp Business Platform alerts to the shop for PhonePe payments confirmed by PhonePe, UPI payment screenshots submitted at checkout, and website visits.
 - Private shop approval page. Orders stay pending until payment is checked and the shop approves them; approval sends a WhatsApp template to the customer.
 - Optional one-tap WhatsApp approval: a verified Quick Reply webhook matches the approval payload, approves the pending order, and sends the customer a confirmation template.
 
@@ -34,6 +34,8 @@ Add one website URL button labeled `Review and approve`, with URL `https://YOUR-
 
 To approve directly from the shop's WhatsApp, create a second approved template named `new_order_approval_quick_reply` (language `en_US`) with the same seven body fields and one **Quick Reply** button labeled `Approve order`. Configure the app's Webhooks product to call `https://YOUR-SITE/api/whatsapp/webhook`, set a strong verify token matching `WHATSAPP_WEBHOOK_VERIFY_TOKEN`, and subscribe the WhatsApp Business Account to the `messages` field. Set the Meta App Secret in `META_APP_SECRET` and the approved template name in `WHATSAPP_APPROVAL_QUICK_REPLY_TEMPLATE_NAME`. With that setting present, shop alerts use the Quick Reply button. Only a reply from the configured `WHATSAPP_TO` shop number is accepted. Tapping **Approve order** approves that pending order and sends the existing `order_approved` customer template. Keep the URL-button approval page as a fallback by leaving the quick-reply template setting blank.
 
+For static UPI proof approval, create an approved template named `payment_proof_approval` (language `en_US`) with an **Image** header, body `{{1}}. Customer: {{2}}. Phone: {{3}}. Delivery address: {{4}}. Items: {{5}}. Total paid: {{6}}. {{7}}.`, and one **Quick Reply** button labeled `Approve`. The checkout sends the selected JPG/PNG screenshot to WhatsApp and uses it in this template. The order does not appear as approvable until this screenshot has been received successfully. When the shop taps **Approve**, the existing `order_approved` template confirms the order to the customer. This image-header template and the WhatsApp API credentials must be configured in Render.
+
 Create a second template named `website_visit_alert` with language `en_US` and body `A visitor opened {{1}} at {{2}}.` This sends one alert when a browser tab first opens a store page. A local `file://` preview cannot send the alert.
 
 Submit the template for approval. Add these as private environment variables in Render:
@@ -48,6 +50,8 @@ Submit the template for approval. Add these as private environment variables in 
 - WHATSAPP_TEMPLATE_NAME: approved template name, `new_order_approval`.
 - WHATSAPP_TEMPLATE_LANGUAGE: template language, en_US.
 - WHATSAPP_APPROVAL_QUICK_REPLY_TEMPLATE_NAME: optional approved WhatsApp template with a Quick Reply button labeled `Approve order`; see one-tap setup above.
+- WHATSAPP_PAYMENT_PROOF_TEMPLATE_NAME: approved image-header template for UPI payment screenshot alerts, `payment_proof_approval`.
+- WHATSAPP_PAYMENT_PROOF_TEMPLATE_LANGUAGE: image-header template language, `en_US`.
 - WHATSAPP_VISIT_TEMPLATE_NAME: approved template name, `website_visit_alert`.
 - WHATSAPP_VISIT_TEMPLATE_LANGUAGE: template language, en_US.
 - ADMIN_APPROVAL_TOKEN: a long random secret (at least 32 characters) used to sign in to `/admin.html`.
@@ -60,7 +64,7 @@ Create and get Meta approval for a third template named `order_approved`, langua
 
 The server fills the delivery dates when the shop approves the order. Defaults are 5–7 calendar days for India and 10–14 calendar days for other countries. Set `DOMESTIC_DELIVERY_MIN_DAYS`, `DOMESTIC_DELIVERY_MAX_DAYS`, `INTERNATIONAL_DELIVERY_MIN_DAYS`, and `INTERNATIONAL_DELIVERY_MAX_DAYS` in the server environment to match the shop's courier estimates.
 
-Customers must opt in to WhatsApp order updates at checkout. After paying the displayed UPI QR, the customer selects their payment screenshot and shares it to the shop's WhatsApp chat. The site saves the order and sends the shop a WhatsApp alert with the customer name, phone number, address, products, total, and an approval button. A QR payment itself does not send a bank event to the website, so the shop must first verify the screenshot and bank credit. With the approved Quick Reply template and webhook configured, the shop taps **Approve order** in WhatsApp; the server approves that order and sends the customer the `order_approved` WhatsApp confirmation. Otherwise, use the existing review link or `/admin.html`. Orders are stored in `orders.json` on the server, so configure persistent disk storage with your hosting provider before production use. A static `file://` page cannot run approvals; use the Node server or deployed site URL.
+Customers must opt in to WhatsApp order updates at checkout. After paying the displayed UPI QR, they select their payment screenshot on the checkout page and submit it. The server uploads the image to WhatsApp and sends the shop one image-header template containing the screenshot, order details, and **Approve** button. Before the screenshot is accepted, no approval button is sent and the order remains `AWAITING_PAYMENT_PROOF`. The shop must still verify the bank credit; a screenshot alone does not prove that money arrived. Tapping **Approve** sends the customer the `order_approved` WhatsApp confirmation. Orders are stored in `orders.json` on the server, so configure persistent disk storage with your hosting provider before production use. A static `file://` page cannot run approvals; use the Node server or deployed site URL.
 
 For local preview, copy .env.example to .env and fill in the same values. The .env file is excluded by .gitignore.
 
@@ -89,11 +93,11 @@ The local file:// preview cannot call the payment server. Run npm start and open
 
 ## Static UPI QR fallback
 
-The checkout reveals the shop-provided QR image after the customer selects Pay now (payee RJ Moshe, UPI ID hazina.mew-3@okhdfcbank), a copy-UID action, and an amount-filled UPI app link. Delivery is ₹60 for India PIN codes beginning 600 and ₹120 for other Indian PIN codes. For other countries, checkout displays “Applicable” without adding or showing a delivery amount; confirm the international delivery charge separately. Static QR payments are manual: the website can alert the shop when a customer submits the order, but it cannot detect a bank credit from this QR. The shop must check the bank and approve the order. The customer can share the payment screenshot with +91 84386 06950. Automatic payment alerts are available for PhonePe Standard Checkout after a verified server callback. The QR image is images/upi-payment-qr.jpeg.
+The checkout reveals the shop-provided QR image after the customer selects Pay now (payee RJ Moshe, UPI ID hazina.mew-3@okhdfcbank), a copy-UID action, and an amount-filled UPI app link. Delivery is ₹60 for India PIN codes beginning 600 and ₹120 for other Indian PIN codes. For other countries, checkout displays “Applicable” without adding or showing a delivery amount; confirm the international delivery charge separately. Static QR payments are manual: after the customer submits a screenshot, the shop gets the image and order details with the WhatsApp **Approve** button. The QR payment itself cannot notify the website of a bank credit, so the shop must check the bank before tapping **Approve**. Automatic payment alerts are available for PhonePe Standard Checkout after a verified server callback. The QR image is images/upi-payment-qr.jpeg.
 
 ## Sending UPI payment proof
 
-After a customer pays the static QR, checkout saves an order in `orders.json`, then lets them select the successful payment screenshot and share it with the order reference and details. The customer must choose WhatsApp Business and send the screenshot to the shop (+91 84386 06950). The site cannot capture a screenshot from GPay or verify the payment itself. The order remains pending until the shop checks its bank account and approves it in `/admin.html`; the approved `order_approved` WhatsApp template then notifies the customer. This requires the running Node service, persistent storage, the Meta WhatsApp settings above, and the customer's WhatsApp consent at checkout.
+After a customer pays the static QR, checkout saves an order in `orders.json`, then lets them select the successful screenshot. The server sends that image with the order details to the shop using the approved `payment_proof_approval` image-header template. Only after WhatsApp accepts the screenshot does the order move to `PENDING_APPROVAL` and the **Approve** button become available. The site cannot verify the bank payment itself. When the shop taps **Approve**, the `order_approved` template notifies the customer. This requires the running Node service, persistent storage, the Meta WhatsApp settings above, and the customer's WhatsApp consent at checkout.
 
 
 ## Manual bank transfer
