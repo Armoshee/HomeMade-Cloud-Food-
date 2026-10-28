@@ -1,13 +1,15 @@
 # HomeMade Cloud Food Online Orders
 
-This folder contains the HomeMade Cloud Food website and a Node.js server. Customers can add products to a cart and pay by the shop QR code or manual bank transfer. Customers can share payment proof through WhatsApp; the shop must verify the credit before confirming the order. WhatsApp Business API notifications are available only when the Meta credentials and approved message template are configured.
+This folder contains the website and a Node.js server. Customers can add products to a cart and use secure online checkout when a PhonePe PG account is configured. The server validates payments and keeps each order pending until the shop manually approves it. WhatsApp alerts require approved templates and Meta Business Platform credentials.
 
 ## What is ready
 
 - Add to Cart, Buy Now, quantity controls, and order totals.
 - Checkout form for customer name, phone, delivery address, city, PIN code, and notes.
 - Server-side product and price validation.
-- Google Pay / UPI QR and manual bank transfer options at checkout.
+- WhatsApp Business Platform alerts to the shop for PhonePe payments confirmed by PhonePe, manual payment-verification requests, and website visits.
+- Private shop approval page. Orders stay pending until payment is checked and the shop approves them; approval sends a WhatsApp template to the customer.
+- Optional one-tap WhatsApp approval: a verified Quick Reply webhook matches the approval payload, approves the pending order, and sends the customer a confirmation template.
 
 ## Publish the website online
 
@@ -24,24 +26,47 @@ Render Free is suitable for testing. It spins down after 15 minutes idle and may
 
 ## WhatsApp notification setup
 
-Create a WhatsApp Business Platform app in Meta's Developer Hub. Set up a sender number and create a Utility template named new_order_alert with language en_US and this body:
+Create a WhatsApp Business Platform app in Meta's Developer Hub. Set up a sender number and create a template named `new_order_approval` with language `en_US` and this body:
 
-New website order {{1}}. Customer: {{2}}. Phone: {{3}}. Address: {{4}}. Items: {{5}}. Total: {{6}}. Notes: {{7}}.
+{{1}}. Customer: {{2}}. Phone: {{3}}. Delivery address: {{4}}. Items: {{5}}. Total: {{6}}. {{7}}.
+
+Add one website URL button labeled `Review and approve`, with URL `https://YOUR-SITE/approve/{{1}}`. This opens a private order review page; opening the link does not approve the order. The shop must check the payment and press **Approve order** on that page.
+
+To approve directly from the shop's WhatsApp, create a second approved template named `new_order_approval_quick_reply` (language `en_US`) with the same seven body fields and one **Quick Reply** button labeled `Approve order`. Configure the app's Webhooks product to call `https://YOUR-SITE/api/whatsapp/webhook`, set a strong verify token matching `WHATSAPP_WEBHOOK_VERIFY_TOKEN`, and subscribe the WhatsApp Business Account to the `messages` field. Set the Meta App Secret in `META_APP_SECRET` and the approved template name in `WHATSAPP_APPROVAL_QUICK_REPLY_TEMPLATE_NAME`. With that setting present, shop alerts use the Quick Reply button. Only a reply from the configured `WHATSAPP_TO` shop number is accepted. Tapping **Approve order** approves that pending order and sends the existing `order_approved` customer template. Keep the URL-button approval page as a fallback by leaving the quick-reply template setting blank.
+
+Create a second template named `website_visit_alert` with language `en_US` and body `A visitor opened {{1}} at {{2}}.` This sends one alert when a browser tab first opens a store page. A local `file://` preview cannot send the alert.
 
 Submit the template for approval. Add these as private environment variables in Render:
 
 - WHATSAPP_API_VERSION: current Graph API version shown in Meta.
 - WHATSAPP_PHONE_NUMBER_ID: API sender's Phone Number ID.
 - WHATSAPP_ACCESS_TOKEN: secret token; never put it in index.html or send it in chat.
+- META_APP_SECRET: Meta App Secret, used to verify signatures on inbound WhatsApp webhooks.
+- WHATSAPP_WEBHOOK_VERIFY_TOKEN: private token used when Meta verifies `/api/whatsapp/webhook`.
 - WHATSAPP_TO: notification recipient, India country code 91 plus the shop number.
-- WHATSAPP_TEMPLATE_NAME: approved template name, new_order_alert.
+- PUBLIC_SITE_URL: the deployed website's public HTTPS base URL.
+- WHATSAPP_TEMPLATE_NAME: approved template name, `new_order_approval`.
 - WHATSAPP_TEMPLATE_LANGUAGE: template language, en_US.
+- WHATSAPP_APPROVAL_QUICK_REPLY_TEMPLATE_NAME: optional approved WhatsApp template with a Quick Reply button labeled `Approve order`; see one-tap setup above.
+- WHATSAPP_VISIT_TEMPLATE_NAME: approved template name, `website_visit_alert`.
+- WHATSAPP_VISIT_TEMPLATE_LANGUAGE: template language, en_US.
+- ADMIN_APPROVAL_TOKEN: a long random secret (at least 32 characters) used to sign in to `/admin.html`.
+- WHATSAPP_APPROVED_TEMPLATE_NAME: approved Utility template name for customer approval, `order_approved`.
+- WHATSAPP_APPROVED_TEMPLATE_LANGUAGE: the template language, `en_US`.
+
+Create and get Meta approval for a third template named `order_approved`, language `en_US`, with this body:
+
+`Your order {{1}} is confirmed. Payment {{2}} is verified. Expected delivery: {{3}} to {{4}}. Thank you for choosing HomeMade Cloud Food.`
+
+The server fills the delivery dates when the shop approves the order. Defaults are 5–7 calendar days for India and 10–14 calendar days for other countries. Set `DOMESTIC_DELIVERY_MIN_DAYS`, `DOMESTIC_DELIVERY_MAX_DAYS`, `INTERNATIONAL_DELIVERY_MIN_DAYS`, and `INTERNATIONAL_DELIVERY_MAX_DAYS` in the server environment to match the shop's courier estimates.
+
+Customers must opt in to WhatsApp order updates at checkout. After paying the displayed UPI QR, the customer selects their payment screenshot and shares it to the shop's WhatsApp chat. The site saves the order and sends the shop a WhatsApp alert with the customer name, phone number, address, products, total, and an approval button. A QR payment itself does not send a bank event to the website, so the shop must first verify the screenshot and bank credit. With the approved Quick Reply template and webhook configured, the shop taps **Approve order** in WhatsApp; the server approves that order and sends the customer the `order_approved` WhatsApp confirmation. Otherwise, use the existing review link or `/admin.html`. Orders are stored in `orders.json` on the server, so configure persistent disk storage with your hosting provider before production use. A static `file://` page cannot run approvals; use the Node server or deployed site URL.
 
 For local preview, copy .env.example to .env and fill in the same values. The .env file is excluded by .gitignore.
 
 ## Local preview
 
-Install Node.js 24, open a terminal in this folder, run npm start, and open http://localhost:3000. The customer scans the displayed UPI QR or makes a bank transfer, then shares the payment reference and screenshot with the shop through WhatsApp. The shop must verify payment manually. The local `file://` preview cannot process orders; use `http://localhost:3000` or the deployed Render Node Web Service.
+Install Node.js 24, open a terminal in this folder, run npm start, and open http://localhost:3000. Online checkout works after PhonePe PG keys are configured. Shop WhatsApp notifications additionally require the Meta WhatsApp settings and an approved template. The local `file://` preview cannot process payments; use `http://localhost:3000` or the deployed Render Node Web Service.
 
 ## Product prices
 
@@ -50,13 +75,25 @@ The server keeps a copy of the price list so customers cannot change a price in 
 
 
 
+## PhonePe Standard Checkout
+
+Checkout starts a PhonePe PG session on the server and saves the pending order before redirecting. Customers can choose UPI, QR, cards, or net banking in PhonePe's hosted checkout. A PhonePe webhook or server-side status check verifies the final payment state and amount. Payment confirmation sends the shop a WhatsApp alert, but the order still waits for the shop's manual approval.
+
+1. In PhonePe Business, complete merchant onboarding and obtain the Standard Checkout Client ID, Client Secret, and Client Version. Never paste the Client Secret into HTML, GitHub, or chat.
+2. Add these private environment variables in Render: PHONEPE_CLIENT_ID, PHONEPE_CLIENT_SECRET, PHONEPE_CLIENT_VERSION, PHONEPE_ENV=SANDBOX while testing, PHONEPE_WEBHOOK_USERNAME and PHONEPE_WEBHOOK_PASSWORD, CHENNAI_DELIVERY_FEE_INR=60, DOMESTIC_DELIVERY_FEE_INR=120.
+3. In the PhonePe Business dashboard, register `https://YOUR-SITE/api/phonepe/webhook`, choose SHA authentication with the same webhook username/password, and subscribe to `checkout.order.completed` and `checkout.order.failed`.
+4. Deploy the Node Web Service and verify a sandbox payment. Switch to production credentials and PHONEPE_ENV=PRODUCTION only after PhonePe enables your live account.
+5. Configure persistent storage for orders before relying on payment records for live operations. PhonePe webhooks are idempotent and orders are saved before checkout, so a browser redirect or service restart is not required to receive a payment alert.
+
+The local file:// preview cannot call the payment server. Run npm start and open http://localhost:3000/cart.html, or use the deployed Render service. Checkout needs the PhonePe merchant credentials above.
+
 ## Static UPI QR fallback
 
-The checkout also displays the shop-provided QR image (payee RJ Moshe, UPI ID hazina.mew-3@okhdfcbank), a copy-UID action, and an amount-filled UPI app link. The amount displayed includes the current cart items and shipping (₹150 within India; international courier ₹700 per started kg with a minimum charge of 1 kg). Customers can send their UTR/reference with the order through WhatsApp to +91 84386 06950. This QR path is a manual payment flow: do not mark an order paid until the bank receipt is checked. A static QR payment cannot update this website automatically; the shop must verify payment. The QR image is images/upi-payment-qr.jpeg.
+The checkout reveals the shop-provided QR image after the customer selects Pay now (payee RJ Moshe, UPI ID hazina.mew-3@okhdfcbank), a copy-UID action, and an amount-filled UPI app link. Delivery is ₹60 for India PIN codes beginning 600 and ₹120 for other Indian PIN codes. For other countries, checkout displays “Applicable” without adding or showing a delivery amount; confirm the international delivery charge separately. Static QR payments are manual: the website can alert the shop when a customer submits the order, but it cannot detect a bank credit from this QR. The shop must check the bank and approve the order. The customer can share the payment screenshot with +91 84386 06950. Automatic payment alerts are available for PhonePe Standard Checkout after a verified server callback. The QR image is images/upi-payment-qr.jpeg.
 
 ## Sending UPI payment proof
 
-After a customer pays the static QR, checkout lets them select the successful payment screenshot and share it with the order details. On browsers that support file sharing, the native share sheet opens; the customer must choose WhatsApp Business and the shop chat (+91 84386 06950). Otherwise, the direct WhatsApp chat opens with the order details and the customer must attach the selected image in WhatsApp. The site cannot automatically capture a screenshot from GPay or read/verify the payment. A customer message or screenshot does not confirm receipt; the shop must verify the credit in its bank account before confirming the order.
+After a customer pays the static QR, checkout saves an order in `orders.json`, then lets them select the successful payment screenshot and share it with the order reference and details. The customer must choose WhatsApp Business and send the screenshot to the shop (+91 84386 06950). The site cannot capture a screenshot from GPay or verify the payment itself. The order remains pending until the shop checks its bank account and approves it in `/admin.html`; the approved `order_approved` WhatsApp template then notifies the customer. This requires the running Node service, persistent storage, the Meta WhatsApp settings above, and the customer's WhatsApp consent at checkout.
 
 
 ## Manual bank transfer

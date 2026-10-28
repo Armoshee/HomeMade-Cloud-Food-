@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart | HomeMade Cloud Food</title>
     <link rel="stylesheet" href="site.css">
-    <link rel="icon" href="home-made-cloud-icon.svg" type="image/svg+xml">
+    <link rel="icon" href="images/glassy-cloud-food-badge.png?v=3" type="image/png">
 </head>
 <body>
     <nav>
         <a class="brand" href="index.html" aria-label="HomeMade Cloud Food home">
-            <img class="brand-logo" src="home-made-cloud-logo.svg" alt="HomeMade Cloud Food logo">
+            <img class="brand-badge" src="images/glassy-cloud-food-badge.png?v=3" alt="Bismillah Cloud Food logo">
+            <span class="brand-wordmark">HomeMade</span>
         </a>
         <ul>
             <li><a href="index.html">Home</a></li>
@@ -23,7 +24,7 @@
     <main class="cart-page">
         <h1>Your Cart</h1>
         <div id="cart-empty">Your cart is empty. Add products from the Products page.</div>
-        <section class="checkout-summary" aria-label="Order summary"><h2>Order summary</h2><div id="cart-items"></div><p>Subtotal <strong id="cart-subtotal">₹0</strong></p><p>Shipping <strong id="shipping-fee">₹150</strong></p><p class="cart-total">Total <strong id="cart-total">₹0</strong></p></section>
+        <section class="checkout-summary" aria-label="Order summary"><h2>Order summary</h2><div id="cart-items"></div><p>Subtotal <strong id="cart-subtotal">₹0</strong></p><p>Delivery charge <strong id="shipping-fee">Applicable</strong></p><p class="cart-total">Total <strong id="cart-total">₹0</strong></p></section>
     <form class="checkout-form" id="checkout-form" hidden>
         <h3>Delivery details</h3>
         <label>Full name<input name="customerName" autocomplete="name" required maxlength="100"></label>
@@ -36,18 +37,16 @@
         </div>
         <div class="form-grid"><label>Phone / WhatsApp number<input name="customerPhone" type="tel" autocomplete="tel" required pattern="[0-9+() -]{7,20}" maxlength="20"></label></div>
         <p class="delivery-estimate" id="checkout-delivery-estimate" aria-live="polite"></p>
-        <p class="international-shipping-note" id="international-shipping-note" hidden>International courier: ₹700 per kg (minimum charge 1 kg). Charge is calculated from the total cart weight.</p>
-        <fieldset class="shipping-choice"><legend>Courier service</legend><label><input type="radio" name="shippingMethod" value="Standard courier" checked> Standard courier <span class="shipping-option-price">₹150.00</span></label><label><input type="radio" name="shippingMethod" value="Alternate courier"> Alternate courier <span class="shipping-option-price">₹150.00</span></label><small>Shipping price can be changed in the shop server settings.</small></fieldset>
+        <p class="international-shipping-note" id="international-shipping-note" hidden>International delivery charge applies; the charge is calculated from the total cart weight.</p>
+        <fieldset class="shipping-choice"><legend>Courier service</legend><label><input type="radio" name="shippingMethod" value="Standard courier" checked> Standard courier <span class="shipping-option-price">Delivery charge applies</span></label><label><input type="radio" name="shippingMethod" value="Alternate courier"> Alternate courier <span class="shipping-option-price">Delivery charge applies</span></label><small>Delivery charge is included in the total.</small></fieldset>
         <fieldset class="billing-choice"><legend>Billing address</legend><label><input type="radio" name="billingSame" value="yes" checked> Same as delivery address</label><label><input type="radio" name="billingSame" value="no"> Use a different billing address</label><div id="billing-fields" hidden><label>Billing country / region<select name="billingCountry" autocomplete="country-name"><option value="Afghanistan">Afghanistan</option><option value="Åland Islands">Åland Islands</option><option value="Albania">Albania</option><option value="Algeria">Algeria</option><option value="American Samoa">American Samoa</option><option value="Andorra">Andorra</option><option value="Angola">Angola</option><option value="Anguilla">Anguilla</option><option value="Antigua &amp; Barbuda">Antigua &amp; Barbuda</option><option value="Argentina">Argentina</option><option value="Armenia">Armenia</option><option value="Aruba">Aruba</option><option value="Australia">Australia</option><option value="Austria">Austria</option><option value="Azerbaijan">Azerbaijan</option><option value="Bahamas">Bahamas</option><option value="Bahrain">Bahrain</option><option value="Bangladesh">Bangladesh</option><option value="Barbados">Barbados</option><option value="Belarus">Belarus</option><option value="Belgium">Belgium</option><option value="Belize">Belize</option><option value="Benin">Benin</option><option value="Bermuda">Bermuda</option><option value="Bhutan">Bhutan</option><option value="Bolivia">Bolivia</option><option value="Bonaire, Sint Eustatius and Saba">Bonaire, Sint Eustatius and Saba</option><option value="Bosnia &amp; Herzegovina">Bosnia &amp; Herzegovina</option><option value="Botswana">Botswana</option><option value="Brazil">Brazil</option><option value="British Indian Ocean Territory">British Indian Ocean Territory</option><option value="British Virgin Islands">British Virgin Islands</option><option value="Brunei">Brunei</option><option value="Bulgaria">Bulgaria</option><option value="Burkina Faso">Burkina Faso</option><option value="Burundi">Burundi</option><option value="Cabo Verde">Cabo Verde</option><option value="Cambodia">Cambodia</option><option value="Cameroon">Cameroon</option><option value="Canada">Canada</option><option value="Cayman Islands">Cayman Islands</option><option value="Central African Republic">Central African Republic</option><option value="Chad">Chad</option><option value="Chile">Chile</option><option value="China">China</option><option value="Christmas Island">Christmas Island</option><option value="Cocos (Keeling) Islands">Cocos (Keeling) Islands</option><option value="Colombia">Colombia</option><option value="Comoros">Comoros</option><option value="Congo">Congo</option><option value="Congo (DRC)">Congo (DRC)</option><option value="Cook Islands">Cook Islands</option><option value="Costa Rica">Costa Rica</option><option value="Côte d’Ivoire">Côte d’Ivoire</option><option value="Croatia">Croatia</option><option value="Cuba">Cuba</option><option value="Curaçao">Curaçao</option><option value="Cyprus">Cyprus</option><option value="Czechia">Czechia</option><option value="Denmark">Denmark</option><option value="Djibouti">Djibouti</option><option value="Dominica">Dominica</option><option value="Dominican Republic">Dominican Republic</option><option value="Ecuador">Ecuador</option><option value="Egypt">Egypt</option><option value="El Salvador">El Salvador</option><option value="Equatorial Guinea">Equatorial Guinea</option><option value="Eritrea">Eritrea</option><option value="Estonia">Estonia</option><option value="Eswatini">Eswatini</option><option value="Ethiopia">Ethiopia</option><option value="Falkland Islands">Falkland Islands</option><option value="Faroe Islands">Faroe Islands</option><option value="Fiji">Fiji</option><option value="Finland">Finland</option><option value="France">France</option><option value="French Guiana">French Guiana</option><option value="French Polynesia">French Polynesia</option><option value="Gabon">Gabon</option><option value="Gambia">Gambia</option><option value="Georgia">Georgia</option><option value="Germany">Germany</option><option value="Ghana">Ghana</option><option value="Gibraltar">Gibraltar</option><option value="Greece">Greece</option><option value="Greenland">Greenland</option><option value="Grenada">Grenada</option><option value="Guadeloupe">Guadeloupe</option><option value="Guam">Guam</option><option value="Guatemala">Guatemala</option><option value="Guernsey">Guernsey</option><option value="Guinea">Guinea</option><option value="Guinea-Bissau">Guinea-Bissau</option><option value="Guyana">Guyana</option><option value="Haiti">Haiti</option><option value="Honduras">Honduras</option><option value="Hong Kong SAR">Hong Kong SAR</option><option value="Hungary">Hungary</option><option value="Iceland">Iceland</option><option value="India" selected>India</option><option value="Indonesia">Indonesia</option><option value="Iran">Iran</option><option value="Iraq">Iraq</option><option value="Ireland">Ireland</option><option value="Isle of Man">Isle of Man</option><option value="Israel">Israel</option><option value="Italy">Italy</option><option value="Jamaica">Jamaica</option><option value="Japan">Japan</option><option value="Jersey">Jersey</option><option value="Jordan">Jordan</option><option value="Kazakhstan">Kazakhstan</option><option value="Kenya">Kenya</option><option value="Kiribati">Kiribati</option><option value="Kosovo">Kosovo</option><option value="Kuwait">Kuwait</option><option value="Kyrgyzstan">Kyrgyzstan</option><option value="Laos">Laos</option><option value="Latvia">Latvia</option><option value="Lebanon">Lebanon</option><option value="Lesotho">Lesotho</option><option value="Liberia">Liberia</option><option value="Libya">Libya</option><option value="Liechtenstein">Liechtenstein</option><option value="Lithuania">Lithuania</option><option value="Luxembourg">Luxembourg</option><option value="Macao SAR">Macao SAR</option><option value="Madagascar">Madagascar</option><option value="Malawi">Malawi</option><option value="Malaysia">Malaysia</option><option value="Maldives">Maldives</option><option value="Mali">Mali</option><option value="Malta">Malta</option><option value="Marshall Islands">Marshall Islands</option><option value="Martinique">Martinique</option><option value="Mauritania">Mauritania</option><option value="Mauritius">Mauritius</option><option value="Mayotte">Mayotte</option><option value="Mexico">Mexico</option><option value="Micronesia">Micronesia</option><option value="Moldova">Moldova</option><option value="Monaco">Monaco</option><option value="Mongolia">Mongolia</option><option value="Montenegro">Montenegro</option><option value="Montserrat">Montserrat</option><option value="Morocco">Morocco</option><option value="Mozambique">Mozambique</option><option value="Myanmar">Myanmar</option><option value="Namibia">Namibia</option><option value="Nauru">Nauru</option><option value="Nepal">Nepal</option><option value="Netherlands">Netherlands</option><option value="New Caledonia">New Caledonia</option><option value="New Zealand">New Zealand</option><option value="Nicaragua">Nicaragua</option><option value="Niger">Niger</option><option value="Nigeria">Nigeria</option><option value="Niue">Niue</option><option value="Norfolk Island">Norfolk Island</option><option value="North Korea">North Korea</option><option value="North Macedonia">North Macedonia</option><option value="Northern Mariana Islands">Northern Mariana Islands</option><option value="Norway">Norway</option><option value="Oman">Oman</option><option value="Pakistan">Pakistan</option><option value="Palau">Palau</option><option value="Palestinian Authority">Palestinian Authority</option><option value="Panama">Panama</option><option value="Papua New Guinea">Papua New Guinea</option><option value="Paraguay">Paraguay</option><option value="Peru">Peru</option><option value="Philippines">Philippines</option><option value="Pitcairn Islands">Pitcairn Islands</option><option value="Poland">Poland</option><option value="Portugal">Portugal</option><option value="Puerto Rico">Puerto Rico</option><option value="Qatar">Qatar</option><option value="Réunion">Réunion</option><option value="Romania">Romania</option><option value="Russia">Russia</option><option value="Rwanda">Rwanda</option><option value="Samoa">Samoa</option><option value="San Marino">San Marino</option><option value="São Tomé &amp; Príncipe">São Tomé &amp; Príncipe</option><option value="Saudi Arabia">Saudi Arabia</option><option value="Senegal">Senegal</option><option value="Serbia">Serbia</option><option value="Seychelles">Seychelles</option><option value="Sierra Leone">Sierra Leone</option><option value="Singapore">Singapore</option><option value="Sint Maarten">Sint Maarten</option><option value="Slovakia">Slovakia</option><option value="Slovenia">Slovenia</option><option value="Solomon Islands">Solomon Islands</option><option value="Somalia">Somalia</option><option value="South Africa">South Africa</option><option value="South Sudan">South Sudan</option><option value="Spain">Spain</option><option value="Sri Lanka">Sri Lanka</option><option value="St Helena, Ascension, Tristan da Cunha">St Helena, Ascension, Tristan da Cunha</option><option value="St. Barthélemy">St. Barthélemy</option><option value="St. Kitts &amp; Nevis">St. Kitts &amp; Nevis</option><option value="St. Lucia">St. Lucia</option><option value="St. Martin">St. Martin</option><option value="St. Pierre &amp; Miquelon">St. Pierre &amp; Miquelon</option><option value="St. Vincent &amp; Grenadines">St. Vincent &amp; Grenadines</option><option value="Sudan">Sudan</option><option value="Suriname">Suriname</option><option value="Svalbard &amp; Jan Mayen">Svalbard &amp; Jan Mayen</option><option value="Sweden">Sweden</option><option value="Switzerland">Switzerland</option><option value="Syria">Syria</option><option value="Taiwan">Taiwan</option><option value="Tajikistan">Tajikistan</option><option value="Tanzania">Tanzania</option><option value="Thailand">Thailand</option><option value="Timor-Leste">Timor-Leste</option><option value="Togo">Togo</option><option value="Tokelau">Tokelau</option><option value="Tonga">Tonga</option><option value="Trinidad &amp; Tobago">Trinidad &amp; Tobago</option><option value="Tunisia">Tunisia</option><option value="Türkiye">Türkiye</option><option value="Turkmenistan">Turkmenistan</option><option value="Turks &amp; Caicos Islands">Turks &amp; Caicos Islands</option><option value="Tuvalu">Tuvalu</option><option value="U.S. Outlying Islands">U.S. Outlying Islands</option><option value="U.S. Virgin Islands">U.S. Virgin Islands</option><option value="Uganda">Uganda</option><option value="Ukraine">Ukraine</option><option value="United Arab Emirates">United Arab Emirates</option><option value="United Kingdom">United Kingdom</option><option value="United States">United States</option><option value="Uruguay">Uruguay</option><option value="Uzbekistan">Uzbekistan</option><option value="Vanuatu">Vanuatu</option><option value="Vatican City">Vatican City</option><option value="Venezuela">Venezuela</option><option value="Vietnam">Vietnam</option><option value="Wallis &amp; Futuna">Wallis &amp; Futuna</option><option value="Yemen">Yemen</option><option value="Zambia">Zambia</option><option value="Zimbabwe">Zimbabwe</option></select></label><label>Billing address<textarea name="billingAddress" maxlength="400"></textarea></label><div class="form-grid"><label>Billing city<input name="billingCity" maxlength="100"></label><label>Billing state / province<input name="billingState" maxlength="100"></label><label>Billing PIN / postal code<input name="billingPincode" maxlength="12"></label></div></div></fieldset>
         <label>Order notes (optional)<textarea name="notes" maxlength="300"></textarea></label>
         <label class="terms-check"><input type="checkbox" name="acceptTerms" required> I agree to the <a href="#terms">terms and refund policy</a>.</label>
-        <fieldset class="payment-method-selector"><legend>Payment</legend>
-            <label class="payment-option"><input type="radio" name="paymentMethod" value="upi" checked><span class="payment-option-copy"><strong>Google Pay / UPI QR</strong><small>Scan the shop QR and pay the order total.</small></span><span class="payment-badges" aria-label="Google Pay and UPI"><span>GPay</span><span>UPI</span></span></label>
-            <label class="payment-option"><input type="radio" name="paymentMethod" value="bank"><span class="payment-option-copy"><strong>Bank transfer</strong><small>Transfer to the SBI account and share payment proof.</small></span></label>
-        </fieldset>
-        <section id="bank-transfer-details" class="bank-transfer-panel" aria-labelledby="bank-transfer-title" hidden><h3 id="bank-transfer-title">Bank transfer</h3><p>You can also transfer the order total to this State Bank of India account. Please share the transaction reference with your order.</p><dl><div><dt>Account name</dt><dd>Muhaseena A</dd></div><div><dt>Account number</dt><dd>20282840630</dd></div><div><dt>Bank</dt><dd>State Bank of India</dd></div><div><dt>IFSC</dt><dd>SBIN0003274</dd></div><div><dt>Branch</dt><dd>Besant Nagar</dd></div></dl><p class="bank-transfer-note">Orders paid by bank transfer remain pending until the payment is verified by the shop.</p></section>
-        <section id="upi-payment-details" class="upi-qr-panel" aria-labelledby="upi-qr-title" hidden><h3 id="upi-qr-title">Pay by UPI QR</h3><p>Scan with Google Pay or another UPI app. Enter the total shown below if your app asks for an amount.</p><div class="upi-qr-content"><img src="images/upi-payment-qr.jpeg" alt="UPI payment QR for RJ Moshe" class="upi-qr-image"><div class="upi-qr-details"><p>Payee: <strong>RJ Moshe</strong></p><p>UPI ID: <strong>hazina.mew-3@okhdfcbank</strong></p><p>Amount due: <strong id="upi-amount">₹0</strong></p><div class="upi-qr-actions"><button type="button" class="upi-secondary-button" id="copy-upi-id">Copy UPI ID</button><a class="upi-secondary-button" id="open-upi-app" href="upi://pay?pa=hazina.mew-3%40okhdfcbank&amp;pn=RJ%20Moshe&amp;cu=INR">Open UPI app</a></div><small>The order stays pending until the shop checks the payment in its bank account.</small></div></div></section>
-        <section id="manual-payment-proof" class="manual-payment-proof" aria-labelledby="manual-proof-title" hidden><h3 id="manual-proof-title">Share payment proof</h3><p>After paying, add the transaction reference and a successful payment screenshot. Your order stays pending until the shop verifies the payment.</p><label for="manual-payment-reference">Transaction reference / UTR</label><input id="manual-payment-reference" name="upiReference" maxlength="40" autocomplete="off" placeholder="Enter after payment"><label for="manual-payment-image">Payment screenshot</label><input id="manual-payment-image" type="file" accept="image/*"><small>Choose the successful payment screenshot from your device. The browser cannot capture a payment screen automatically.</small><button type="button" class="upi-confirm-button" id="send-payment-confirmation">Share payment proof on WhatsApp</button></section>
+        <label class="terms-check"><input type="checkbox" name="acceptWhatsAppApproval" required> Send me the payment verification and order approval update on WhatsApp at the number above.</label>
+        <section class="bank-transfer-panel" aria-labelledby="bank-transfer-title"><h3 id="bank-transfer-title">Bank transfer</h3><p>You can also transfer the order total to this State Bank of India account. Please share the transaction reference with your order.</p><dl><div><dt>Account name</dt><dd>Muhaseena A</dd></div><div><dt>Account number</dt><dd>20282840630</dd></div><div><dt>Bank</dt><dd>State Bank of India</dd></div><div><dt>IFSC</dt><dd>SBIN0003274</dd></div><div><dt>Branch</dt><dd>Besant Nagar</dd></div></dl><p class="bank-transfer-note">Orders paid by bank transfer remain pending until the payment is verified by the shop.</p></section>
+        <button class="place-order-button" type="button" id="show-upi-payment">Pay now</button><section class="upi-qr-panel" aria-labelledby="upi-qr-title"><h3 id="upi-qr-title">Pay by UPI QR</h3><p>Scan with GPay, PhonePe, Paytm, or another UPI app. Enter the total shown below if your app asks for an amount.</p><div class="upi-qr-content"><img src="images/upi-payment-qr.jpeg" alt="UPI payment QR for RJ Moshe" class="upi-qr-image" id="upi-qr-image" hidden><div class="upi-qr-details" id="upi-qr-details-panel" hidden><p>Payee: <strong>RJ Moshe</strong></p><p>UPI ID: <strong>hazina.mew-3@okhdfcbank</strong></p><p>Amount due: <strong id="upi-amount">₹0</strong></p><div class="upi-qr-actions"><button type="button" class="upi-secondary-button" id="copy-upi-id">Copy UPI ID</button><a class="upi-secondary-button" id="open-upi-app" href="upi://pay?pa=hazina.mew-3%40okhdfcbank&amp;pn=RJ%20Moshe&amp;cu=INR">Open UPI app</a></div><label for="upi-reference">UPI transaction reference / UTR</label><input id="upi-reference" name="upiReference" maxlength="40" autocomplete="off" placeholder="Enter after payment"><label for="upi-proof-image">Payment screenshot</label><input id="upi-proof-image" type="file" accept="image/*"><small>After paying, select the success screenshot from your device. Then share it to WhatsApp Business at +91 84386 06950. Your browser cannot capture the GPay screen by itself.</small><button type="button" class="upi-confirm-button" id="send-upi-confirmation">Share payment proof on WhatsApp</button><small>The order stays pending until the shop checks the bank credit and approves it. An approval update will then be sent to your WhatsApp.</small></div></div></section>
+        <button class="place-order-button" type="submit">Pay securely with PhonePe</button>
+        <p class="checkout-note">Continue to PhonePe secure checkout. UPI QR, UPI apps, cards, and net banking appear when enabled on your PhonePe PG account.</p>
     </form>
         <p class="checkout-status" id="checkout-status" role="status" aria-live="polite"></p>
         <a class="checkout-whatsapp-link" id="checkout-whatsapp-link" hidden target="_blank" rel="noopener">Contact us on WhatsApp</a>
@@ -57,6 +56,7 @@
     <footer>
         <p>© 2026 HomeMade Cloud Food | Homemade With Love ❤️</p>
     </footer>
+<script src="https://mercury.phonepe.com/web/bundle/checkout.js"></script>
 <script>
 (() => {
     const key = "cloudFoodPicklesCart";
@@ -78,16 +78,19 @@
     const postalCode = document.getElementById("delivery-postal-code");
     const deliveryEstimate = document.getElementById("checkout-delivery-estimate");
     const intlShippingNote = document.getElementById("international-shipping-note");
-    let shippingFee = 150;
-    let internationalRatePerKg = 700;
+    let chennaiDeliveryFee = 60;
+    let domesticDeliveryFee = 120;
     const money = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
     let cart = {};
     try { cart = JSON.parse(localStorage.getItem(key) || "{}") || {}; } catch {}
     function entries() { return Object.entries(cart).filter(([, item]) => item && Number(item.qty) > 0); }
-    function shippingFor(items, country = countrySelect.value) {
-        if (country === "India") return shippingFee;
-        const grams = items.reduce((sum, [, item]) => sum + (Number(item.packGrams) || Number((String(item.name).match(/(\d+)\s*g/i) || [])[1]) || 250) * Number(item.qty), 0);
-        return Math.max(1, Math.ceil(grams / 1000)) * internationalRatePerKg;
+    function shippingFor(items, country = countrySelect.value, pincode = postalCode.value) {
+        if (country === "India") return /^600\d{3}$/.test(pincode) ? chennaiDeliveryFee : domesticDeliveryFee;
+        return 0;
+    }
+    function deliveryChargeDisclosure(country = countrySelect.value, pincode = postalCode.value) {
+        if (country === "India") return /^600\d{3}$/.test(pincode) ? money.format(chennaiDeliveryFee) : money.format(domesticDeliveryFee);
+        return "Applicable";
     }
     function estimateDelivery(international) {
         const start = new Date(); start.setHours(12,0,0,0);
@@ -105,14 +108,18 @@
         const appliedShipping = items.length ? shippingFor(items) : 0;
         countLabel.textContent = String(count);
         subtotalLabel.textContent = money.format(subtotal);
-        shippingFeeLabel.textContent = money.format(appliedShipping);
+        shippingFeeLabel.textContent = deliveryChargeDisclosure();
         const total = subtotal + appliedShipping;
         totalLabel.textContent = money.format(total);
         upiAmountLabel.textContent = money.format(total);
         upiAppLink.href = "upi://pay?" + new URLSearchParams({ pa: "hazina.mew-3@okhdfcbank", pn: "RJ Moshe", am: total.toFixed(2), cu: "INR", tn: "HomeMade Cloud Food order" }).toString();
-        document.querySelectorAll(".shipping-option-price").forEach(el => el.textContent = isInternational ? money.format(internationalRatePerKg) + " / kg" : money.format(shippingFee));
+        const optionChargeLabel = deliveryChargeDisclosure();
+        document.querySelectorAll(".shipping-option-price").forEach(el => el.textContent = optionChargeLabel);
         if (deliveryEstimate) deliveryEstimate.textContent = estimateDelivery(isInternational);
-        if (intlShippingNote) intlShippingNote.hidden = !isInternational;
+        if (intlShippingNote) {
+            intlShippingNote.hidden = !isInternational;
+            intlShippingNote.textContent = "International delivery charge applicable. The delivery charge will be confirmed separately.";
+        }
         empty.hidden = items.length > 0;
         form.hidden = items.length === 0;
         list.replaceChildren();
@@ -139,24 +146,46 @@
         if (button.dataset.cartAction === "remove" || cart[id].qty <= 0) delete cart[id];
         save(); render();
     });
+    document.getElementById("show-upi-payment").addEventListener("click", () => {
+        if (!entries().length || !form.reportValidity()) return;
+        document.getElementById("upi-qr-details-panel").hidden = false;
+        document.getElementById("upi-qr-image").hidden = false;
+        document.getElementById("show-upi-payment").hidden = true;
+    });
     document.getElementById("copy-upi-id").addEventListener("click", async event => {
         try { await navigator.clipboard.writeText("hazina.mew-3@okhdfcbank"); event.currentTarget.textContent = "UPI ID copied"; setTimeout(() => { event.currentTarget.textContent = "Copy UPI ID"; }, 1800); }
         catch { status.textContent = "UPI ID: hazina.mew-3@okhdfcbank"; }
     });
-    const manualProof = document.getElementById("manual-payment-proof");
-    function updatePaymentMethod() {
-        const method = form.querySelector('input[name="paymentMethod"]:checked')?.value || "upi";
-        document.getElementById("upi-payment-details").hidden = method !== "upi";
-        document.getElementById("bank-transfer-details").hidden = method !== "bank";
-        manualProof.hidden = false;
-    }
-    form.addEventListener("change", event => {
-        if (event.target.name === "paymentMethod") updatePaymentMethod();
-        if (event.target.name === "billingSame") {
-            const different = new FormData(form).get("billingSame") === "no";
-            billingFields.hidden = !different;
-            billingFields.querySelectorAll("input,textarea").forEach(el => el.required = different);
+    document.getElementById("send-upi-confirmation").addEventListener("click", async () => {
+        if (!entries().length || !form.reportValidity()) return;
+        const data = new FormData(form); const reference = String(data.get("upiReference") || "").trim();
+        const screenshot = document.getElementById("upi-proof-image").files[0];
+        if (!screenshot) { document.getElementById("upi-proof-image").focus(); status.textContent = "Select the successful UPI payment screenshot to share with your order."; return; }
+        const items = entries(); const subtotal = items.reduce((sum, [, item]) => sum + Number(item.qty) * Number(item.price), 0);
+        const currentShipping = shippingFor(items);
+        const lines = items.map(([, item]) => "- " + item.name + " x " + item.qty + ": " + money.format(item.price * item.qty));
+        const button = document.getElementById("send-upi-confirmation");
+        button.disabled = true;
+        status.textContent = "Saving your order for shop approval…";
+        let pending;
+        try {
+            const response = await fetch("/api/manual-orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkoutPayload(data, items, reference)) });
+            pending = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(pending.error || "Could not save this order. Please contact the shop.");
+        } catch (error) {
+            status.textContent = error.message || "The order server is unavailable. Open this page from the live website, not a file preview.";
+            button.disabled = false;
+            return;
         }
+        const chargeDisclosure = deliveryChargeDisclosure(String(data.get("country")), String(data.get("pincode")));
+        const message = ["UPI payment proof for HomeMade Cloud Food order (awaiting shop verification and approval).", "Order reference: " + pending.orderId, "Name: " + data.get("customerName"), "Phone: " + data.get("customerPhone"), "Delivery address: " + data.get("address") + ", " + data.get("city") + ", " + (data.get("state") || data.get("stateIndia")) + ", " + data.get("country") + " - " + data.get("pincode"), "Items:", ...lines, "Subtotal: " + money.format(subtotal), "Delivery charge: " + chargeDisclosure, "Total paid/due: " + money.format(subtotal + currentShipping), "UPI ID: hazina.mew-3@okhdfcbank", reference ? "Transaction reference / UTR: " + reference : "", data.get("notes") ? "Notes: " + data.get("notes") : ""].filter(Boolean).join("\n");
+        if (navigator.canShare && navigator.share && navigator.canShare({ files: [screenshot] })) {
+            navigator.share({ title: "HomeMade Cloud Food payment proof", text: message, files: [screenshot] }).then(() => { status.textContent = "Order " + pending.orderId + " is pending. Send the screenshot to the shop in WhatsApp; the shop will verify payment and approve it before processing."; }).catch(error => { if (error.name !== "AbortError") status.textContent = "Order " + pending.orderId + " is saved. Open WhatsApp Business and attach the selected screenshot to +91 84386 06950."; });
+        } else {
+            window.open("https://wa.me/918438606950?text=" + encodeURIComponent(message), "_blank", "noopener");
+            status.textContent = "Order " + pending.orderId + " is pending. Attach the selected screenshot in WhatsApp and send it; the shop will verify payment and approve before processing.";
+        }
+        button.disabled = false;
     });
     function updateCountryFields() {
         const india = countrySelect.value === "India";
@@ -168,38 +197,69 @@
         render();
     }
     countrySelect.addEventListener("change", updateCountryFields);
-
-    form.addEventListener("submit", event => { event.preventDefault(); document.getElementById("send-payment-confirmation").click(); });
-    document.getElementById("send-payment-confirmation").addEventListener("click", async () => {
-        if (!form.reportValidity()) return;
-        const fields = new FormData(form);
-        const paymentMethod = fields.get("paymentMethod") === "bank" ? "SBI bank transfer" : "UPI QR";
-        const reference = String(fields.get("upiReference") || "").trim();
-        const fileInput = document.getElementById("manual-payment-image");
-        const items = entries();
-        if (!items.length) { status.textContent = "Your cart is empty."; return; }
-        if (!reference) { status.textContent = "Enter the payment transaction reference / UTR."; document.getElementById("manual-payment-reference").focus(); return; }
-        const itemText = items.map(([, item]) => `${item.name} x ${item.qty} — ${money.format(item.price * item.qty)}`).join("\n");
-        const addressParts = [fields.get("address"), fields.get("city"), fields.get("state"), fields.get("country"), fields.get("pincode")].filter(Boolean);
-        const message = ["New pending website order — HomeMade Cloud Food", `Customer: ${fields.get("customerName")}`, `Phone: ${fields.get("customerPhone")}`, `Delivery address: ${addressParts.join(", ")}`, `Items:\n${itemText}`, `Subtotal: ${subtotalLabel.textContent}`, `Shipping: ${shippingFeeLabel.textContent}`, `Total: ${totalLabel.textContent}`, `Payment method: ${paymentMethod}`, `Transaction reference / UTR: ${reference}`, fields.get("notes") ? `Notes: ${fields.get("notes")}` : "", "Please verify the payment and reply with order approval. This order is not confirmed until the shop verifies payment."].filter(Boolean).join("\n");
-        const whatsappUrl = `https://wa.me/918438606950?text=${encodeURIComponent(message)}`;
-        const screenshot = fileInput.files && fileInput.files[0];
-        if (screenshot && navigator.share && navigator.canShare) {
-            try {
-                const shareData = { title: "Payment proof", text: message, files: [screenshot] };
-                if (navigator.canShare(shareData)) { await navigator.share(shareData); status.textContent = "Choose WhatsApp Business to send the order and payment screenshot. The shop will confirm after checking payment."; return; }
-            } catch (error) { if (error && error.name === "AbortError") return; }
+    postalCode.addEventListener("input", render);
+    form.addEventListener("change", event => {
+        if (event.target.name === "billingSame") {
+            const different = new FormData(form).get("billingSame") === "no";
+            billingFields.hidden = !different;
+            billingFields.querySelectorAll("input,textarea").forEach(el => el.required = different);
         }
-        whatsappLink.href = whatsappUrl;
-        whatsappLink.textContent = "Open WhatsApp to send order details";
-        whatsappLink.hidden = false;
-        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-        status.textContent = screenshot ? "WhatsApp opened with order details. Attach your selected payment screenshot there, then send the message." : "WhatsApp opened with order details. Send the message; attach your payment screenshot if available.";
     });
-    updatePaymentMethod();
+    function whatsappOrderUrl(data, items, orderId) {
+        const subtotal = items.reduce((sum, [, item]) => sum + Number(item.qty) * Number(item.price), 0);
+        const currentShipping = shippingFor(items);
+        const lines = items.map(([, item]) => "- " + item.name + " x " + item.qty + ": " + money.format(item.price * item.qty));
+        const chargeDisclosure = deliveryChargeDisclosure(String(data.get("country")), String(data.get("pincode")));
+        const message = [orderId ? "PhonePe payment completed. Order reference: " + orderId : "Hello! I would like to place an order from HomeMade Cloud Food.", "Name: " + data.get("customerName"), "Phone: " + data.get("customerPhone"), "Delivery address: " + data.get("address") + ", " + data.get("city") + ", " + (data.get("state") || data.get("stateIndia")) + ", " + data.get("country") + " - " + data.get("pincode"), "Items:", ...lines, "Subtotal: " + money.format(subtotal), "Delivery charge: " + chargeDisclosure, "Total: " + money.format(subtotal + currentShipping), data.get("notes") ? "Notes: " + data.get("notes") : ""].filter(Boolean).join("\n");
+        return "https://wa.me/918438606950?text=" + encodeURIComponent(message);
+    }
+    async function checkPayment(id) {
+        const response = await fetch("/api/payments/status?merchantOrderId=" + encodeURIComponent(id));
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "Could not verify payment yet.");
+        return result;
+    }
+    function checkoutPayload(data, items, paymentReference) {
+        return { customerName: data.get("customerName"), customerPhone: data.get("customerPhone"), pincode: data.get("pincode"), address: data.get("address"), city: data.get("city"), state: data.get("state") || data.get("stateIndia"), country: data.get("country"), notes: data.get("notes") || "", shippingMethod: data.get("shippingMethod"), billingSame: data.get("billingSame") === "yes", billingAddress: data.get("billingAddress") || "", billingCity: data.get("billingCity") || "", billingState: data.get("billingState") || "", billingCountry: data.get("billingCountry") || "", billingPincode: data.get("billingPincode") || "", acceptTerms: data.get("acceptTerms") === "on", acceptWhatsAppApproval: data.get("acceptWhatsAppApproval") === "on", paymentReference: paymentReference || "", items: items.map(([id, item]) => ({ id: item.productId || id.replace(/__(?:250|500|950|1000)g$/, ""), grams: item.packGrams || null, qty: item.qty })) };
+    }
+    const returnedOrder = new URLSearchParams(location.search).get("phonepe_order");
+    if (returnedOrder) {
+        status.textContent = "PhonePe returned. Verifying payment securely…";
+        checkPayment(returnedOrder).then(result => {
+            if (result.state === "COMPLETED") { cart = {}; save(); render(); status.textContent = result.approved ? "Payment verified and order approved: " + result.orderId + "." : "Payment verified. Order " + result.orderId + " is waiting for shop approval. You will receive a WhatsApp message after approval."; }
+            else if (result.state === "FAILED" || result.state === "CANCELLED") status.textContent = "Payment was not completed. Your cart is still saved; you can try again.";
+            else status.textContent = "Payment is still processing. Refresh this page in a moment to check again.";
+        }).catch(error => { status.textContent = error.message; });
+        history.replaceState({}, "", location.pathname);
+    }
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+        const items = entries();
+        if (!items.length || !form.reportValidity()) return;
+        const data = new FormData(form);
+        const button = form.querySelector(".place-order-button");
+        button.disabled = true; button.textContent = "Opening PhonePe checkout…"; status.textContent = ""; whatsappLink.hidden = true;
+        try {
+            const response = await fetch("/api/payments/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkoutPayload(data, items)) });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.error || "PhonePe checkout is not configured yet.");
+            if (!window.PhonePeCheckout) throw new Error("PhonePe checkout could not load. Please try again or contact us.");
+            window.PhonePeCheckout.transact({ tokenUrl: result.redirectUrl, type: "IFRAME", callback: async () => {
+                status.textContent = "Checking payment with PhonePe…";
+                try { const paid = await checkPayment(result.merchantOrderId); if (paid.state === "COMPLETED") { cart = {}; save(); render(); status.textContent = paid.approved ? "Payment verified and order approved: " + paid.orderId + "." : "Payment verified. Order " + paid.orderId + " is waiting for shop approval. You will receive a WhatsApp message after approval."; } else status.textContent = "Payment was not completed yet. Your cart is still saved."; }
+                catch (error) { status.textContent = error.message; }
+            } });
+        } catch (error) {
+            status.textContent = error.message || "Online payment could not start.";
+            whatsappLink.href = whatsappOrderUrl(data, items);
+            whatsappLink.textContent = "Place this order through WhatsApp";
+            whatsappLink.hidden = false;
+        } finally { button.disabled = false; button.textContent = "Pay securely with PhonePe"; }
+    });
     updateCountryFields();
-    fetch("/api/store-config").then(response => response.json()).then(config => { if (Number.isFinite(Number(config.shippingFeeInr)) && Number(config.shippingFeeInr) >= 0) shippingFee = Number(config.shippingFeeInr); if (Number.isFinite(Number(config.internationalRatePerKgInr)) && Number(config.internationalRatePerKgInr) > 0) internationalRatePerKg = Number(config.internationalRatePerKgInr); render(); }).catch(() => render());
+    fetch("/api/store-config").then(response => response.json()).then(config => { if (Number.isFinite(Number(config.chennaiDeliveryFeeInr)) && Number(config.chennaiDeliveryFeeInr) >= 0) chennaiDeliveryFee = Number(config.chennaiDeliveryFeeInr); if (Number.isFinite(Number(config.domesticDeliveryFeeInr)) && Number(config.domesticDeliveryFeeInr) >= 0) domesticDeliveryFee = Number(config.domesticDeliveryFeeInr); render(); }).catch(() => render());
 })();
 </script>
+<script src="site-visit.js" defer></script>
 </body>
 </html>

@@ -1024,6 +1024,12 @@ body:not(.home-page) footer { margin: 0; padding: 20px; color: #fff8e8; backgrou
 .brand-mark { display:block; width:48px; height:48px; flex:0 0 48px; object-fit:contain; border:0; border-radius:50%; background:transparent; }
 .brand-footer .brand-mark { background:transparent; }
 
+/* Use the supplied transparent badge directly so it renders in every browser. */
+.brand-badge { display:block; width:82px; height:82px; flex:0 0 82px; object-fit:contain; }
+.brand-wordmark { color:#522018; font:700 34px Georgia,serif; white-space:nowrap; }
+.brand-footer .brand-wordmark { color:#522018; }
+@media (max-width:560px) { .brand-badge { width:62px; height:62px; flex-basis:62px; } .brand-wordmark { font-size:25px; } }
+
 /* Wide logo lockup with the full HomeMade Cloud Food name */
 .brand-logo { display:block; width:350px; height:auto; max-height:86px; object-fit:contain; }
 .brand-footer .brand-logo { width:360px; max-height:90px; }
@@ -1281,24 +1287,7 @@ body:not(.home-page) nav ul a:active span { color: #74251d; background: #fff2d6;
 .bank-transfer-panel dd { margin:0; font-weight:700; overflow-wrap:anywhere; }
 .bank-transfer-panel .bank-transfer-note { margin:12px 0 0; font-size:.92em; }
 @media(max-width:480px) { .bank-transfer-panel { padding:16px; } .bank-transfer-panel dl > div { grid-template-columns:1fr; gap:3px; } }
-.payment-method-selector { display:grid; gap:0; margin:18px 0; padding:0; overflow:hidden; border:1px solid #d7d7d7; border-radius:12px; background:#fff; }
-.payment-method-selector legend { margin:0 0 10px; padding:0 6px; color:var(--cloud-forest-deep); font-size:1.2rem; font-weight:700; }
-.payment-option { display:flex; align-items:center; gap:13px; margin:0; padding:15px 16px; border:1px solid #dedede; border-radius:10px; cursor:pointer; }
-.payment-option + .payment-option { margin-top:9px; }
-.payment-option:has(input:checked) { border-color:#3e3e3e; background:#fafafa; }
-.payment-option input[type=radio] { width:19px; height:19px; flex:0 0 19px; accent-color:#17482f; }
-.payment-option-copy { display:grid; flex:1; gap:5px; }
-.payment-option-copy strong { color:#202020; }
-.payment-option-copy small,.phonepe-redirect-note { color:#5c5c5c; line-height:1.45; }
-.payment-badges { display:flex; flex-wrap:wrap; gap:5px; }
-.payment-badges span { display:grid; min-width:34px; height:27px; place-items:center; padding:0 5px; border:1px solid #e0e0e0; border-radius:4px; color:#172b85; background:#fff; font-size:10px; font-weight:800; }
-.phonepe-redirect-note { margin:0; padding:13px 16px; border:1px solid #dedede; border-top:0; border-radius:0 0 10px 10px; text-align:center; }
-.manual-payment-proof { display:grid; gap:9px; margin:16px 0; padding:18px; border:1px solid #dedede; border-radius:12px; background:#fafafa; }
-.manual-payment-proof h3,.manual-payment-proof p { margin:0; }
-.manual-payment-proof label { font-weight:700; }
-.manual-payment-proof input { width:100%; min-height:44px; padding:10px 12px; border:1px solid #cfc4b7; border-radius:9px; font:inherit; }
-.manual-payment-proof small { color:#66574d; line-height:1.5; }
-@media(max-width:560px) { .payment-option { align-items:flex-start; flex-wrap:wrap; } .payment-badges { margin-left:32px; } }
-#phonepe-pay-button[hidden], .manual-payment-proof[hidden], .bank-transfer-panel[hidden], .upi-qr-panel[hidden] { display:none !important; }
 
-.checkout-form .payment-option { display:flex; align-items:center; gap:13px; font-weight:500; }
+/* Match the footer brand panel to the poster's warm footer gradient. */
+.brand-footer { background: linear-gradient(115deg, #5d1715 0%, #84351f 58%, #986b2c 100%); }
+.brand-footer .brand-wordmark { color: #fff5df; }

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Review order approval | HomeMade Cloud Food</title>
+  <link rel="stylesheet" href="site.css">
+  <style>
+    main { max-width: 700px; margin: 48px auto; padding: 28px; background: #fffaf2; border: 1px solid #e6c98a; border-radius: 16px; }
+    li { margin: 8px 0; }
+    .notice { color: #65584d; }
+    .error { color: #a11d16; }
+    button { border: 0; border-radius: 8px; padding: 13px 22px; background: #8b241a; color: white; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Review payment and order</h1>
+    <p id="status" class="notice" role="status" aria-live="polite">Loading order…</p>
+    <section id="details" hidden>
+      <p><strong>Order:</strong> <span id="order-id"></span></p>
+      <p><strong>Customer:</strong> <span id="customer-name"></span></p>
+      <p><strong>Payment:</strong> <span id="payment-method"></span></p>
+      <p id="reference-row" hidden><strong>UPI reference:</strong> <span id="payment-reference"></span></p>
+      <h2>Items</h2>
+      <ul id="items"></ul>
+      <p><strong>Total:</strong> <span id="total"></span></p>
+      <p class="notice">Approve only after you have checked the payment in your bank account. Approval places the order and sends the customer a WhatsApp update.</p>
+      <button id="approve" type="button" hidden>Approve order</button>
+    </section>
+  </main>
+<script>
+(() => {
+  const status = document.getElementById("status");
+  const button = document.getElementById("approve");
+  const token = location.pathname.split("/").filter(Boolean).pop() || "";
+  const money = amount => "₹" + new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Number(amount) || 0);
+  async function loadOrder() {
+    const response = await fetch("/api/order-approval/" + encodeURIComponent(token), { cache: "no-store" });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "Could not load this order.");
+    const order = result.order;
+    document.getElementById("order-id").textContent = order.orderId;
+    document.getElementById("customer-name").textContent = order.customerName;
+    document.getElementById("payment-method").textContent = order.paymentMethod;
+    if (order.paymentReference) {
+      document.getElementById("payment-reference").textContent = order.paymentReference;
+      document.getElementById("reference-row").hidden = false;
+    }
+    document.getElementById("total").textContent = money(order.total);
+    const items = document.getElementById("items");
+    for (const item of order.items) {
+      const row = document.createElement("li");
+      row.textContent = item.name + " × " + item.qty;
+      items.append(row);
+    }
+    document.getElementById("details").hidden = false;
+    if (order.status === "APPROVED") status.textContent = "This order is already approved.";
+    else if (order.status === "PENDING_APPROVAL" || order.status === "PAID_PENDING_APPROVAL") {
+      status.textContent = "Payment confirmation is required before approving.";
+      button.hidden = false;
+    } else status.textContent = "This order is no longer awaiting approval.";
+  }
+  button.addEventListener("click", async () => {
+    if (!confirm("Have you verified this payment in your bank account? Approving will place the order and message the customer.")) return;
+    button.disabled = true;
+    status.textContent = "Approving order and sending WhatsApp update…";
+    try {
+      const response = await fetch("/api/order-approval/" + encodeURIComponent(token), { method: "POST" });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Could not approve this order.");
+      button.hidden = true;
+      status.textContent = result.alreadyApproved ? "This order was already approved." : "Order " + result.orderId + " approved. WhatsApp accepted the customer update.";
+    } catch (error) {
+      status.className = "error";
+      status.textContent = error.message;
+      button.disabled = false;
+    }
+  });
+  loadOrder().catch(error => { status.className = "error"; status.textContent = error.message; });
+})();
+</script>
+</body>
+</html>
